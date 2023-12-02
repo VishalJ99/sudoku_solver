@@ -3,3 +3,6 @@
 
 # .pyc files
 *.pyc
+
+# sphinx documentation
+docs/_*
