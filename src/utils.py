@@ -1,7 +1,7 @@
 import re
 
 
-def validate_sudoku_input(input_string, verbose=False):
+def validate_sudoku_input(sudoku_lines, verbose=False):
     """
     TODO:
     - Merge white space and new line removal into one loop
@@ -33,7 +33,7 @@ def validate_sudoku_input(input_string, verbose=False):
 
     Parameters
     ----------
-    input_string : list
+    sudoku_lines : list
         List of strings, where each string element represents a row of the sudoku board txt file.
         A typical argument for this param would be the output of f.readlines() on the board file.
     verbose : bool, optional
@@ -88,55 +88,55 @@ def validate_sudoku_input(input_string, verbose=False):
     empty_line_found = False
 
     # remove any white spaces
-    for idx, row in enumerate(input_string):
+    for idx, row in enumerate(sudoku_lines):
         if bool(re.search(r"\s", row.rstrip())):
-            input_string[idx] = "".join(row.split())
+            sudoku_lines[idx] = "".join(row.split())
             white_space_found = True
 
     if white_space_found and verbose:
         warning_message = (
             f"[WARNING] White space found in input string\n"
-            f"Found:\n{input_string}\n"
-            f"Replacing with:\n{input_string}\n"
+            f"Found:\n{sudoku_lines}\n"
+            f"Replacing with:\n{sudoku_lines}\n"
         )
         print(warning_message)
 
     # remove any empty lines
-    for idx, row in enumerate(input_string):
+    for idx, row in enumerate(sudoku_lines):
         if not row.rstrip():
-            input_string.pop(idx)
+            sudoku_lines.pop(idx)
             empty_line_found = True
 
     if empty_line_found and verbose:
         warning_message = (
             f"[WARNING] Empty lines found in input string\n"
-            f"Found:\n{input_string}\n"
+            f"Found:\n{sudoku_lines}\n"
             f"Removing empty lines\n"
-            f"Result:\n{input_string}\n"
+            f"Result:\n{sudoku_lines}\n"
         )
         print(warning_message)
 
     # Check if there are 11 lines (9 rows of numbers and 2 separators)
-    if len(input_string) != 11:
+    if len(sudoku_lines) != 11:
         error_message = "[ERROR] Input string does not have 11 rows\nInput string:\n"
-        for i, row in enumerate(input_string, start=1):
+        for i, row in enumerate(sudoku_lines, start=1):
             error_message += f"{i}: {row}\n"
         raise ValueError(error_message)
 
     # Check each line against the appropriate pattern
-    for i, line in enumerate(input_string):
+    for i, line in enumerate(sudoku_lines):
         # Every fourth line should match separator pattern
         if i % 4 == 3:
             if not separator_row_pattern.match(line):
                 # check separator row does not contain any digits
                 if not bool(re.search(r"\d", line)):
                     # replace the incorrect separator with the correct one
-                    input_string[i] = "---+---+---"
+                    sudoku_lines[i] = "---+---+---"
                     if verbose:
                         warning_message = (
                             f"[WARNING] Separator row does not match expected pattern\n"
                             f"Found:\n{line}\n"
-                            f"Replacing with:\n{input_string[i]}\n"
+                            f"Replacing with:\n{sudoku_lines[i]}\n"
                         )
                         print(warning_message)
                 else:
@@ -156,12 +156,12 @@ def validate_sudoku_input(input_string, verbose=False):
                     groups = re.findall(r"\d{3}", line)
 
                     # join the groups with the correct delimiter
-                    input_string[i] = "|".join(groups)
+                    sudoku_lines[i] = "|".join(groups)
                     if verbose:
                         warning_message = (
                             f"[WARNING] Number row does not match expected pattern\n"
                             f"Found:\n{line}\n"
-                            f"Replacing with:\n{input_string[i]}\n"
+                            f"Replacing with:\n{sudoku_lines[i]}\n"
                         )
                         print(warning_message)
                 else:
@@ -178,4 +178,7 @@ def validate_sudoku_input(input_string, verbose=False):
 
 
 def parse_input(lines):
-    pass
+    """
+    Parses a list of strings representing a sudoku board into a 2D numpy array.
+    Expected format of the input is described in README.md.
+    """
