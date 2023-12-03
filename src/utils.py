@@ -8,6 +8,7 @@ def validate_sudoku_input(input_string, verbose=False):
     - Improve print statements to format sudoku board properly when showing corrections
     - Reject obviously incorrect boards (e.g. 2 numbers in same row)
     - Warning messages should display row number (e.g. [WARNING] White space found in row 1)
+    - Improve clarity of docstring on how a row is assigned as a separator row or number row
 
     Validates a list of strings describing rows of a sudoku board.
     Uses regex pattern matching to check input against format in README.md.
