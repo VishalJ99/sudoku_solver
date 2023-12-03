@@ -180,6 +180,10 @@ def validate_sudoku_input(sudoku_lines, verbose=False):
 
 def parse_sudoku_input(sudoku_lines):
     """
+    TODO:
+    - Add some error handling for incorrect input (e.g. not 9x9, not all digits)
+      incase validate_sudoku_input() is not called before this function.
+
     Parses a list of strings representing a sudoku board into a 2D numpy array.
     Expected input to first be validated using validate_sudoku_input().
     This function does not perform any validation.
