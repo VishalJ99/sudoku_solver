@@ -21,6 +21,7 @@ def validate_sudoku_input(input_string, verbose=False):
     Logic used for seperator row correction involves first checking if the row contains any digits.
     If it does not, seperator row is assumed to be valid and is reformatted to the correct pattern.
     If it does, ValueError is raised.
+    (note that a seperator row is expected for the 4th and 8th row of the sudoku board)
 
     Logic used for number row correction involves first checking if the row matches an alternate
     valid pattern. Alternate valid patterns are rows that match against the following regex:
