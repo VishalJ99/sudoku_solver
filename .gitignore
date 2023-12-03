@@ -6,3 +6,6 @@
 
 # sphinx documentation
 docs/_*
+
+# sandbox
+sandbox.ipynb
