@@ -217,15 +217,14 @@ def parse_sudoku_input(sudoku_lines):
     parsed_matrix = []
     # Check each line against the appropriate pattern
     for i, line in enumerate(sudoku_lines):
-        # Every fourth line should match separator pattern
+        # Every fourth line is a separator row so skip it
         if i % 4 == 3:
             continue
         else:
-            # Other lines should match the number row pattern
-            # extract the triple digits groupings rom the row
-            groups = re.findall(r"\d{3}", line)
+            # extract the triple digits groupings from the row
+            triplet_digit_groups = re.findall(r"\d{3}", line)
             # flatten the list of triplets into a list of digits
-            row = [int(num) for num in "".join(groups)]
+            row = [int(digit) for digit in "".join(triplet_digit_groups)]
             parsed_matrix.append(row)
 
     return np.asarray(parsed_matrix)
