@@ -1,4 +1,5 @@
 import re
+import numpy as np
 
 
 def validate_sudoku_input(sudoku_lines, verbose=False):
@@ -177,8 +178,50 @@ def validate_sudoku_input(sudoku_lines, verbose=False):
     return True
 
 
-def parse_input(lines):
+def parse_sudoku_input(sudoku_lines):
     """
     Parses a list of strings representing a sudoku board into a 2D numpy array.
-    Expected format of the input is described in README.md.
+    Expected input to first be validated using validate_sudoku_input().
+    This function does not perform any validation.
+
+    Parameters
+    ----------
+    sudoku_lines : list
+        List of strings, where each string element represents a row of the sudoku board txt file.
+        Typical argument for this param is the output of f.readlines() on a validated board file.
+
+    Returns
+    -------
+    numpy.ndarray
+        2D numpy array representing the sudoku board.
+
+    Examples
+    --------
+    >>> with open("test/test_boards/good_input.txt", "r") as f:
+    ...     good_input = f.readlines()
+    >>> parse_sudoku_input(good_input)
+    array([[0, 0, 0, 0, 0, 7, 0, 0, 0],
+           [0, 0, 0, 0, 0, 9, 5, 0, 4],
+           [0, 0, 0, 0, 5, 0, 1, 6, 9],
+           [0, 8, 0, 0, 0, 0, 3, 0, 5],
+           [0, 7, 5, 0, 0, 0, 2, 9, 0],
+           [4, 0, 6, 0, 0, 0, 0, 8, 0],
+           [7, 6, 2, 0, 8, 0, 0, 0, 0],
+           [1, 0, 3, 9, 0, 0, 0, 0, 0],
+           [0, 0, 0, 6, 0, 0, 0, 0, 0]])
     """
+    parsed_matrix = []
+    # Check each line against the appropriate pattern
+    for i, line in enumerate(sudoku_lines):
+        # Every fourth line should match separator pattern
+        if i % 4 == 3:
+            continue
+        else:
+            # Other lines should match the number row pattern
+            # extract the triple digits groupings rom the row
+            groups = re.findall(r"\d{3}", line)
+            # flatten the list of triplets into a list of digits
+            row = [int(num) for num in "".join(groups)]
+            parsed_matrix.append(row)
+
+    return np.asarray(parsed_matrix)

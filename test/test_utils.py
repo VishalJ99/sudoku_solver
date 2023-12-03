@@ -1,4 +1,5 @@
 from src import utils
+import numpy as np
 import pytest
 
 
@@ -27,7 +28,23 @@ def test_sudoku_board_validation():
 
 
 def test_sudoku_parser():
-    pass
+    expected_answer = np.asarray(
+        [
+            [0, 0, 0, 0, 0, 7, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 5, 0, 4],
+            [0, 0, 0, 0, 5, 0, 1, 6, 9],
+            [0, 8, 0, 0, 0, 0, 3, 0, 5],
+            [0, 7, 5, 0, 0, 0, 2, 9, 0],
+            [4, 0, 6, 0, 0, 0, 0, 8, 0],
+            [7, 6, 2, 0, 8, 0, 0, 0, 0],
+            [1, 0, 3, 9, 0, 0, 0, 0, 0],
+            [0, 0, 0, 6, 0, 0, 0, 0, 0],
+        ]
+    )
+    with open("test/test_boards/good_input.txt", "r") as f:
+        good_input = f.readlines()
+
+    assert np.array_equal(utils.parse_sudoku_input(good_input), expected_answer)
 
 
 def test_backtracking_solver():
