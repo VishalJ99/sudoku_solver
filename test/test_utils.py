@@ -16,15 +16,26 @@ def test_sudoku_board_validation():
         bad_input_4 = f.readlines()
     with open("test/test_validation_boards/correctable_input.txt", "r") as f:
         correctable_input = f.readlines()
+    with open("test/test_validation_boards/invalid_input_1.txt", "r") as f:
+        invalid_input_1 = f.readlines()
+    with open("test/test_validation_boards/invalid_input_2.txt", "r") as f:
+        invalid_input_2 = f.readlines()
+    with open("test/test_validation_boards/invalid_input_3.txt", "r") as f:
+        invalid_input_3 = f.readlines()
 
     assert utils.validate_sudoku_input(good_input)
     assert utils.validate_sudoku_input(correctable_input)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(utils.FormatError):
         utils.validate_sudoku_input(bad_input_1)
         utils.validate_sudoku_input(bad_input_2)
         utils.validate_sudoku_input(bad_input_3)
         utils.validate_sudoku_input(bad_input_4)
+
+    with pytest.raises(ValueError):
+        utils.validate_sudoku_input(invalid_input_1)
+        utils.validate_sudoku_input(invalid_input_2)
+        utils.validate_sudoku_input(invalid_input_3)
 
 
 def test_sudoku_parser():

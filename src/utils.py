@@ -2,12 +2,24 @@ import re
 import numpy as np
 
 
+class FormatError(Exception):
+    """Exception raised for errors in the input format.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, message="Input format is incorrect"):
+        self.message = message
+        super().__init__(self.message)
+
+
 def validate_sudoku_input(sudoku_lines, verbose=False):
     """
     TODO:
+    - Fix issue where correction is not returned, its True.
     - Merge white space and new line removal into one loop
     - Improve print statements to format sudoku board properly when showing corrections
-    - Reject obviously incorrect boards (e.g. 2 numbers in same row)
     - Warning messages should display row number (e.g. [WARNING] White space found in row 1)
     - Improve clarity of docstring on how a row is assigned as a separator row or number row
 
@@ -122,7 +134,7 @@ def validate_sudoku_input(sudoku_lines, verbose=False):
         error_message = "[ERROR] Input string does not have 11 rows\nInput string:\n"
         for i, row in enumerate(sudoku_lines, start=1):
             error_message += f"{i}: {row}\n"
-        raise ValueError(error_message)
+        raise FormatError(error_message)
 
     # Check each line against the appropriate pattern
     for i, line in enumerate(sudoku_lines):
@@ -147,7 +159,7 @@ def validate_sudoku_input(sudoku_lines, verbose=False):
                         f"Expected:\n---+---+---\n\n"
                         f"Please see README.md for more information."
                     )
-                    raise ValueError(error_message)
+                    raise FormatError(error_message)
         else:
             # Other lines should match the number row pattern
             if not number_row_pattern.match(line):
@@ -172,10 +184,39 @@ def validate_sudoku_input(sudoku_lines, verbose=False):
                         f"Expected format:\n123|456|789\n\n"
                         f"Please see README.md for more information."
                     )
-                    raise ValueError(error_message)
+                    raise FormatError(error_message)
 
-    # If all checks pass
-    return True
+    # make sure that the board is valid
+    board = parse_sudoku_input(sudoku_lines)
+
+    # define a helper functions to check for duplicates in the sudoku board
+    def duplication_check_1d(arr):
+        # if duplicates present in arr
+        # number of unique els greater than 0 will be less than the number of non-zero els
+        return len(np.unique(arr[arr > 0])) < np.count_nonzero(arr > 0)
+
+    # check for duplicates in rows and columns of the board
+    duplicate_in_rows = np.apply_along_axis(duplication_check_1d, 1, board)
+    duplicate_in_cols = np.apply_along_axis(duplication_check_1d, 0, board)
+
+    # flatten each 3x3 square into a row of a new board
+    flattened_subgrid_board = np.array(
+        [board[i : i + 3, j : j + 3].flatten() for i in range(0, 9, 3) for j in range(0, 9, 3)]
+    )
+    # alternative neat method which does the same using reshape but no clue how it works...
+    # flattened_subgrid_board = board.reshape((3,3,3,3)).swapaxes(0,3).reshape(9,-1).T
+
+    # check for any duplicates in the flattened subgrid board's rows to
+    duplicate_in_subgrids = np.apply_along_axis(duplication_check_1d, 1, flattened_subgrid_board)
+    valid = not (
+        np.any(duplicate_in_rows) or np.any(duplicate_in_cols) or np.any(duplicate_in_subgrids)
+    )
+
+    if valid:
+        return True
+    else:
+        error_message = "[ERROR] Input string does not represent a valid Sudoku board\n"
+        raise ValueError(error_message)
 
 
 def parse_sudoku_input(sudoku_lines):
