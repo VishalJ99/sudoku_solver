@@ -59,3 +59,38 @@ class SudokuSolver:
 
         # move is valid
         return True
+
+    def find_empty(self):
+        """
+        Find the next empty square in the board
+
+        Returns
+        -------
+        tuple
+            (row index, column index) of the next empty square,
+            or (None, None) if there are no empty squares
+        """
+        for i in range(9):
+            for j in range(9):
+                if self.board[i, j] == 0:
+                    return i, j
+        return None, None
+
+    def __str__(self):
+        """
+        Formats the string representation of the board in a visually appealing format
+        Use a . for a blank square instead of a 0. Add some whitespace between the 3x3 squares.
+        """
+        board_str = ""
+        for i in range(9):
+            for j in range(9):
+                board_str += str(self.board[i][j]) if self.board[i][j] != 0 else "."
+                if (j + 1) % 3 == 0 and j < 8:
+                    board_str += " | " if j < 8 else ""
+                elif j < 8:
+                    board_str += " "
+            if (i + 1) % 3 == 0 and i < 8:
+                board_str += "\n------+-------+------\n"
+            else:
+                board_str += "\n"
+        return board_str
