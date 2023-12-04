@@ -1,10 +1,14 @@
 from src import solvers, utils
 import numpy as np
+import os
 
 
 def test_sudoku_solver_class():
+    EASY_BOARD_1_PATH = "test/test_solver_boards/easy_1.txt"
+    TEST_SAVE_PATH = "test/test_solver_boards/test_save.txt"
+
     # load in a board
-    with open("test/test_solver_boards/easy_1.txt", "r") as f:
+    with open(EASY_BOARD_1_PATH, "r") as f:
         good_input = f.readlines()
     board = utils.parse_sudoku_input(good_input)
 
@@ -47,3 +51,15 @@ def test_sudoku_solver_class():
     )
 
     assert str(solver) == exp_str
+
+    solver.reset()
+
+    solver.save_board(TEST_SAVE_PATH)
+
+    with open(EASY_BOARD_1_PATH, "r") as f1:
+        original_board_content = f1.read()
+    with open(TEST_SAVE_PATH, "r") as f2:
+        saved_board_content = f2.read()
+
+    assert original_board_content == saved_board_content
+    os.remove(TEST_SAVE_PATH)

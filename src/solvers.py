@@ -97,6 +97,26 @@ class SudokuSolver:
                 board_str += "\n"
         return board_str
 
+    def save_board(self, filename):
+        """
+        Formats the board back into the input format and saves it as a text file
+        with the given filename.
+
+        Parameters
+        ----------
+        filename : str
+            name of the file to save the board to
+        """
+        with open(filename, "w") as f:
+            for i in range(9):
+                for j in range(9):
+                    f.write(str(self.board[i][j]))
+                    if (j + 1) % 3 == 0 and j < 8:
+                        f.write("|")
+                f.write("\n")
+                if (i + 1) % 3 == 0 and i < 8:
+                    f.write("---+---+---\n")
+
 
 class BacktrackingSolver(SudokuSolver):
     """
