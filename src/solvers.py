@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 
 class SudokuSolver:
@@ -26,7 +27,7 @@ class SudokuSolver:
 
     def check_valid(self, row_i, col_j, num):
         """
-        Check if a number is valid in the given position given the current state of the board
+        Check if a number is valid in the given position given the current board
 
         Parameters
         ----------
@@ -62,7 +63,7 @@ class SudokuSolver:
 
     def find_empty(self):
         """
-        Find the next empty square in the board
+        Finds the next empty square in the board (left to right, top to bottom)
 
         Returns
         -------
@@ -70,16 +71,17 @@ class SudokuSolver:
             (row index, column index) of the next empty square,
             or (None, None) if there are no empty squares
         """
-        for i in range(9):
-            for j in range(9):
-                if self.board[i, j] == 0:
-                    return i, j
-        return None, None
+        empty_cells = np.where(self.board == 0)
+        if empty_cells[0].size > 0:
+            return empty_cells[0][0], empty_cells[1][0]
+        else:
+            return None, None
 
     def __str__(self):
         """
         Formats the string representation of the board in a visually appealing format
-        Use a . for a blank square instead of a 0. Add some whitespace between the 3x3 squares.
+        Use a . for a blank square instead of a 0.
+        Add some whitespace between the 3x3 squares.
         """
         board_str = ""
         for i in range(9):
