@@ -19,6 +19,11 @@ class SudokuSolver:
         self.board = copy.deepcopy(board)
         self.original_board = copy.deepcopy(board)
 
+        # if less than 17 squares are filled, the puzzle has multiple solutions
+        # src: https://arxiv.org/abs/1201.0749
+        if np.count_nonzero(self.board) < 17:
+            raise ValueError("Puzzle has multiple solutions")
+
     def reset(self):
         """
         Reset the board to its original state
