@@ -21,31 +21,26 @@ class SudokuBoard:
         if np.count_nonzero(self._board) < 17:
             raise ValueError("Puzzle has multiple solutions")
 
+        self.rows = [set() for _ in range(9)]
+        self.columns = [set() for _ in range(9)]
+        self.subgrids = [set() for _ in range(9)]
+
+        self._initialize_sets()
+
+    def _initialize_sets(self):
+        for i in range(9):
+            for j in range(9):
+                num = self._board[i][j]
+                if num != 0:
+                    self.rows[i].add(num)
+                    self.columns[j].add(num)
+                    self.subgrids[(i // 3) * 3 + (j // 3)].add(num)
+
     def reset(self):
         """
         Reset the board to its original state
         """
         self._board = copy.deepcopy(self._original_board)
-
-    def save(self, fpath):
-        """
-        Formats the board back into the input format and saves it as a text file
-        with the given filename.
-
-        Parameters
-        ----------
-        filename : str
-            name of the file to save the board to
-        """
-        with open(fpath, "w") as f:
-            for i in range(9):
-                for j in range(9):
-                    f.write(str(self._board[i][j]))
-                    if (j + 1) % 3 == 0 and j < 8:
-                        f.write("|")
-                f.write("\n")
-                if (i + 1) % 3 == 0 and i < 8:
-                    f.write("---+---+---\n")
 
     def __str__(self):
         """
@@ -129,47 +124,25 @@ class SudokuBoard:
             # potential room for improvement: return the indices of the duplicates/print the board
             raise ValueError(error_message)
 
-    def check_valid(self, row_i, col_j, num):
-        """
-        Check if a number is valid in the given position given the current board
+    def check_valid(self, row, col, num):
+        subgrid_index = (row // 3) * 3 + (col // 3)
+        return (
+            num not in self.rows[row]
+            and num not in self.columns[col]
+            and num not in self.subgrids[subgrid_index]
+        )
 
-        Parameters
-        ----------
-        row_i : int
-            row index
-        col_j : int
-            column index
+    def place_number(self, row, col, num):
+        self._board[row][col] = num
+        self.rows[row].add(num)
+        self.columns[col].add(num)
+        self.subgrids[(row // 3) * 3 + (col // 3)].add(num)
 
-        Raises
-        ------
-        ValueError
-            If the number is not an integer between 1 and 9
-
-        Returns
-        -------
-        bool
-            True if the number is valid in the given position, False otherwise
-        """
-        if num not in range(1, 10):
-            raise ValueError("Number must be an integer between 1 and 9")
-
-        for i in range(9):
-            # Check if the number is already in the row or column
-            if (self._board[row_i, i] == num) or (self._board[i, col_j] == num):
-                return False
-
-        # find out which 3x3 square the number is in
-        i_0 = (row_i // 3) * 3
-        j_0 = (col_j // 3) * 3
-
-        # Check if the number is already in the 3x3 square
-        for i in range(3):
-            for j in range(3):
-                if self._board[i_0 + i, j_0 + j] == num:
-                    return False
-
-        # move is valid
-        return True
+    def remove_number(self, row, col, num):
+        self._board[row][col] = 0
+        self.rows[row].remove(num)
+        self.columns[col].remove(num)
+        self.subgrids[(row // 3) * 3 + (col // 3)].remove(num)
 
     def find_empty(self):
         """

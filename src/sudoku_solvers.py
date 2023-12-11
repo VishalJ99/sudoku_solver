@@ -1,23 +1,9 @@
-from sudoku_board import SudokuBoard
-
-
 class BacktrackingSolver:
     """
     Class for solving sudoku puzzles using a backtracking algorithm
     """
 
-    def __init__(self, board: SudokuBoard):
-        """
-        Initialize the BacktrackingSolver object
-
-        Parameters
-        ----------
-        board : numpy.ndarray
-            2D numpy array representing the sudoku board to be solved
-        """
-        self.board = board
-
-    def _backtrack(self, log=False):
+    def _backtrack(self):
         """
         Solve the sudoku puzzle using a backtracking algorithm
 
@@ -37,21 +23,19 @@ class BacktrackingSolver:
         for num in range(1, 10):
             if self.board.check_valid(i, j, num):
                 # make the move and repeat recursively
-                self.board[i, j] = num
+                self.board.place_number(i, j, num)
                 if self._backtrack():
                     # puzzle was solved
                     return True
 
                 # if the puzzle was not solved, undo the move
-                self.board[i, j] = 0
+                self.board.remove_number(i, j, num)
 
         # if no numbers worked, an incorrect move was made somewhere
         # return False to backtrack
-        if log:
-            print(f"\r{self.board}", end="")
         return False
 
-    def solve(self):
+    def solve(self, board):
         """
         Solve the sudoku puzzle
 
@@ -60,5 +44,6 @@ class BacktrackingSolver:
         bool
             True if the puzzle was solved, False otherwise
         """
+        self.board = board
         self._backtrack()
         return self.board
