@@ -9,3 +9,9 @@ docs/_*
 
 # sandbox
 sandbox.ipynb
+
+# line profiler results
+*.lprof
+
+# csv
+*.csv

@@ -1,4 +1,4 @@
-from sudoku_parser import SudokuParser
+from sudoku_format_handler import SudokuFormatHandler
 import pytest
 import numpy as np
 import os
@@ -11,14 +11,16 @@ def test_sudoku_board_rule_validation():
     invalid_input_2 = "test/sudoku_board_test_boards/invalid_input_2.txt"
     invalid_input_3 = "test/sudoku_board_test_boards/invalid_input_3.txt"
 
+    format_handler = SudokuFormatHandler()
+
     # .parse() returns an initialised SudokuBoard object.
     with pytest.raises(ValueError):
         # duplication in column
-        SudokuParser(invalid_input_1).parse()
+        format_handler.parse(invalid_input_1, format="grid")
         # duplication in row
-        SudokuParser(invalid_input_2).parse()
+        format_handler.parse(invalid_input_2, format="grid")
         # duplication in 3x3 square
-        SudokuParser(invalid_input_3).parse()
+        format_handler.parse(invalid_input_3, format="grid")
 
 
 def test_board_representation():
@@ -37,8 +39,8 @@ def test_board_representation():
             [0, 0, 0, 6, 0, 0, 0, 0, 0],
         ]
     )
-
-    board = SudokuParser(INPUT).parse()
+    format_handler = SudokuFormatHandler()
+    board = format_handler.parse(INPUT, format="grid")
     assert np.array_equal(board._board, expected_answer)
 
 
@@ -59,8 +61,8 @@ def test_get_set():
             [0, 0, 0, 6, 0, 0, 0, 0, 0],
         ]
     )
-
-    board = SudokuParser(INPUT).parse()
+    format_handler = SudokuFormatHandler()
+    board = format_handler.parse(INPUT, format="grid")
 
     # Test setter.
     board[0, 0] = 1
@@ -81,6 +83,7 @@ def test_print_formatting():
     # allows the the board state to be shown in a nice format.
 
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
+    format_handler = SudokuFormatHandler()
 
     exp_str = (
         "9 1 . | . . . | 4 2 7\n"
@@ -95,7 +98,7 @@ def test_print_formatting():
         ". . . | 3 . . | . . .\n"
         ". 2 6 | . . 8 | . . 9\n"
     )
-    board = SudokuParser(INPUT).parse()
+    board = format_handler.parse(INPUT, format="grid")
 
     assert str(board) == exp_str
 
@@ -105,7 +108,9 @@ def setup_board():
     # use a fixture so that if test fails, the file is still deleted
     INPUT = "test/sudoku_solver_test_boards/easy_1_solution.txt"
     SAVE_PATH = "test/sudoku_solver_test_boards/temp_solution.txt"
-    board = SudokuParser(INPUT).parse()
+    format_handler = SudokuFormatHandler()
+
+    board = format_handler.parse(INPUT, format="grid")
 
     yield board, SAVE_PATH, INPUT
 
@@ -129,7 +134,9 @@ def test_save_method(setup_board):
 def test_reset_method():
     # Check that the board can be reset to its original state
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
-    board = SudokuParser(INPUT).parse()
+    format_handler = SudokuFormatHandler()
+
+    board = format_handler.parse(INPUT, format="grid")
     board[0, 0] = 1
     board.reset()
     assert np.array_equal(board._board, board._original_board)
@@ -138,13 +145,15 @@ def test_reset_method():
 def test_find_empty_method():
     # Check that the board can find the next empty space
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
-    board = SudokuParser(INPUT).parse()
+    format_handler = SudokuFormatHandler()
+    board = format_handler.parse(INPUT, format="grid")
     assert board.find_empty() == (0, 2)
 
 
 def test_check_valid_method():
     # Check that the board can check if a move is valid
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
-    board = SudokuParser(INPUT).parse()
+    format_handler = SudokuFormatHandler()
+    board = format_handler.parse(INPUT, format="grid")
     assert board.check_valid(0, 2, 3)
     assert not board.check_valid(0, 2, 5)

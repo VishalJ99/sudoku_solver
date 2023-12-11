@@ -1,4 +1,4 @@
-from sudoku_parser import SudokuParser
+from sudoku_format_handler import SudokuFormatHandler
 from sudoku_solvers import BacktrackingSolver
 import os
 import pytest
@@ -11,7 +11,9 @@ TEST_SAVE_PATH = "test/sudoku_solver_test_boards/easy_1_bt_sol.txt"
 @pytest.fixture
 def setup_solver_and_board():
     # Setup: Load the board and prepare the solver
-    board = SudokuParser(EASY_BOARD_1_PATH).parse()
+    format_handler = SudokuFormatHandler()
+
+    board = format_handler.parse(EASY_BOARD_1_PATH, format="grid")
     bt_solver = BacktrackingSolver(board)
 
     yield board, bt_solver, EASY_BOARD_1_SOLUTION_PATH, TEST_SAVE_PATH

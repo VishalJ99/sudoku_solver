@@ -61,5 +61,4 @@ class BacktrackingSolver:
             True if the puzzle was solved, False otherwise
         """
         self._backtrack()
-        print(self.board)
         return self.board

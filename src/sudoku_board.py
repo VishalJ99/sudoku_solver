@@ -4,7 +4,13 @@ import copy
 
 class SudokuBoard:
     def __init__(self, sudoku_board, verbose=False):
-        self._board = np.asarray(sudoku_board)
+        board = np.asarray(sudoku_board)
+
+        # check dtype of board
+        if not np.issubdtype(board.dtype, np.integer):
+            raise TypeError("Input array must only contain integers")
+
+        self._board = board
         self._original_board = copy.deepcopy(sudoku_board)
 
         # check board follows the rules of sudoku
@@ -77,6 +83,15 @@ class SudokuBoard:
         self._board[position] = value
 
     def _validate_board_legality(self):
+        # check they all elements in the board are in range 0-9
+        valid_elements = np.all(np.logical_and(self._board >= 0, self._board <= 9))
+        if not valid_elements:
+            error_message = (
+                "[ERROR] Input string does not represent a valid Sudoku board\n"
+                "All elements must be integers between 0 and 9"
+            )
+            raise ValueError(error_message)
+
         # define a helper functions to check for duplicates in the sudoku board
         def duplication_check_1d(arr):
             # if duplicates present in arr
