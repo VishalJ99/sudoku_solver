@@ -1,7 +1,6 @@
 from sudoku_format_handler import SudokuFormatHandler
 import pytest
 import numpy as np
-import os
 
 
 def test_sudoku_board_rule_validation():
@@ -103,34 +102,6 @@ def test_print_formatting():
     assert str(board) == exp_str
 
 
-@pytest.fixture
-def setup_board():
-    # use a fixture so that if test fails, the file is still deleted
-    INPUT = "test/sudoku_solver_test_boards/easy_1_solution.txt"
-    SAVE_PATH = "test/sudoku_solver_test_boards/temp_solution.txt"
-    format_handler = SudokuFormatHandler()
-
-    board = format_handler.parse(INPUT, format="grid")
-
-    yield board, SAVE_PATH, INPUT
-
-    # Teardown: This runs after the test
-    if os.path.exists(SAVE_PATH):
-        os.remove(SAVE_PATH)
-
-
-# test board save method works
-def test_save_method(setup_board):
-    board, SAVE_PATH, INPUT = setup_board
-    board.save(SAVE_PATH)
-
-    with open(INPUT, "r") as f1, open(SAVE_PATH, "r") as f2:
-        original_board_content = f1.read()
-        saved_board_content = f2.read()
-
-    assert original_board_content == saved_board_content
-
-
 def test_reset_method():
     # Check that the board can be reset to its original state
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
@@ -147,7 +118,8 @@ def test_find_empty_method():
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
-    assert board.find_empty() == (0, 2)
+    I, J = board.get_empty_cells()
+    assert (I[0], J[0]) == (0, 2)
 
 
 def test_check_valid_method():

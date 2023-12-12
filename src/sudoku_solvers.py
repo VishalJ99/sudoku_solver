@@ -25,12 +25,13 @@ class BacktrackingSolver:
             raise TimeoutException  # Raise an exception when timeout occurs
 
         # find the next empty square
-        i, j = self.board.find_empty()
+        I, J = self.board.get_empty_cells()
 
         # if there are no empty squares, the puzzle is solved
-        if i is None:
+        if I is None:
             return True
 
+        i, j = I[0], J[0]
         # check which numbers are valid in the empty square
         for num in range(1, 10):
             if self.board.check_valid(i, j, num):

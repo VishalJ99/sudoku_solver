@@ -146,7 +146,24 @@ class SudokuBoard:
         self.subgrids[(row // 3) * 3 + (col // 3)].remove(num)
         self.filled_values -= 1
 
-    def find_empty(self):
+    def get_related(self):
+        """
+        Finds the related squares to the current square.
+        Related squares are squares in the same row, column, or subgrid as the current square.
+
+        Returns
+        -------
+        list
+            List of tuples containing the row and column indices of the related squares
+        """
+        related = set()
+        for i in range(9):
+            for j in range(9):
+                if self._board[i][j] == 0:
+                    related.add((i, j))
+        return related
+
+    def get_empty_cells(self):
         """
         Finds the next empty square in the board (left to right, top to bottom)
 
@@ -158,6 +175,6 @@ class SudokuBoard:
         """
         empty_cells = np.where(self._board == 0)
         if empty_cells[0].size > 0:
-            return empty_cells[0][0], empty_cells[1][0]
+            return empty_cells
         else:
             return None, None
