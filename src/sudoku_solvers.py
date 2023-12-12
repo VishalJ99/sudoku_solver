@@ -1,7 +1,15 @@
+import time
+from exceptions import TimeoutException
+
+
 class BacktrackingSolver:
     """
     Class for solving sudoku puzzles using a backtracking algorithm
     """
+
+    def __init__(self):
+        self.start_time = None
+        self.timeout = None
 
     def _backtrack(self):
         """
@@ -12,6 +20,10 @@ class BacktrackingSolver:
         bool
             True if the puzzle was solved, False otherwise
         """
+        # Check for timeout
+        if self.timeout and (time.time() - self.start_time > self.timeout):
+            raise TimeoutException  # Raise an exception when timeout occurs
+
         # find the next empty square
         i, j = self.board.find_empty()
 
@@ -35,15 +47,53 @@ class BacktrackingSolver:
         # return False to backtrack
         return False
 
-    def solve(self, board):
+    def solve(self, board, timeout=10):
         """
         Solve the sudoku puzzle
+
+        Parameters
+        ----------
+        board : SudokuBoard
+            The sudoku board to be solved
+        timeout : int, optional
+            The maximum time allowed for solving the puzzle, in seconds
 
         Returns
         -------
         bool
             True if the puzzle was solved, False otherwise
         """
+
         self.board = board
-        self._backtrack()
+        self.timeout = timeout
+        if timeout:
+            self.start_time = time.time()
+        try:
+            self._backtrack()
+        except TimeoutException:
+            return None
         return self.board
+
+
+# class BacktrackingSolverWithConstraints(BacktrackingSolver):
+#     """
+#     Class for solving sudoku puzzles using a backtracking algorithm with constraints
+#     """
+#     def reduce_sudoku():
+#         stalled = False
+#         while not stalled:
+#             numbers_placed_before = self.board.filled_values
+
+
+#     def solve(self, board):
+#         """
+#         Solve the sudoku puzzle
+
+#         Returns
+#         -------
+#         bool
+#             True if the puzzle was solved, False otherwise
+#         """
+#         self.board = board
+#         self._backtrack()
+#         return self.board

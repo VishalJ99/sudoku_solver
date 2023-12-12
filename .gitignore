@@ -15,3 +15,7 @@ sandbox.ipynb
 
 # csv
 *.csv
+
+*benchmark*
+
+*solver_test_dir*

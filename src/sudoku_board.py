@@ -24,10 +24,10 @@ class SudokuBoard:
         self.rows = [set() for _ in range(9)]
         self.columns = [set() for _ in range(9)]
         self.subgrids = [set() for _ in range(9)]
+        self.filled_values = 0
+        self._initialise_sets()
 
-        self._initialize_sets()
-
-    def _initialize_sets(self):
+    def _initialise_sets(self):
         for i in range(9):
             for j in range(9):
                 num = self._board[i][j]
@@ -137,12 +137,14 @@ class SudokuBoard:
         self.rows[row].add(num)
         self.columns[col].add(num)
         self.subgrids[(row // 3) * 3 + (col // 3)].add(num)
+        self.filled_values += 1
 
     def remove_number(self, row, col, num):
         self._board[row][col] = 0
         self.rows[row].remove(num)
         self.columns[col].remove(num)
         self.subgrids[(row // 3) * 3 + (col // 3)].remove(num)
+        self.filled_values -= 1
 
     def find_empty(self):
         """
