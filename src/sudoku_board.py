@@ -19,7 +19,7 @@ class SudokuBoard:
         # if less than 17 squares are filled, the puzzle has multiple solutions
         # src: https://arxiv.org/abs/1201.0749
         if np.count_nonzero(self._board) < 17:
-            raise ValueError("Puzzle has multiple solutions")
+            print("[WARNING] Puzzle has multiple solutions, only finding one")
 
         self.rows = [set() for _ in range(9)]
         self.columns = [set() for _ in range(9)]

@@ -1,15 +1,23 @@
 import time
 from exceptions import TimeoutException
+from abc import ABC, abstractmethod
+from sudoku_board import SudokuBoard
+from typing import Union
 
 
-class BacktrackingSolver:
+class Solver(ABC):
+    @abstractmethod
+    def solve(self, board: SudokuBoard) -> Union[SudokuBoard, None]:
+        pass
+
+
+class BacktrackingSolver(Solver):
     """
     Class for solving sudoku puzzles using a backtracking algorithm
     """
 
-    def __init__(self):
-        self.start_time = None
-        self.timeout = None
+    def __init__(self, timeout):
+        self.timeout = timeout
 
     def _backtrack(self):
         """
@@ -31,7 +39,15 @@ class BacktrackingSolver:
         if I is None:
             return True
 
+        # related_cells_list = [len(board.get_related(I[idx], J[idx])) for
+        # # loop over all empty cells
+        # for idx in I:
+        #     i, j = I[idx], J[idx]
+        #     # related = {1,2,3,4}
+        #     related =
+
         i, j = I[0], J[0]
+
         # check which numbers are valid in the empty square
         for num in range(1, 10):
             if self.board.check_valid(i, j, num):
@@ -48,7 +64,7 @@ class BacktrackingSolver:
         # return False to backtrack
         return False
 
-    def solve(self, board, timeout=10):
+    def solve(self, board):
         """
         Solve the sudoku puzzle
 
@@ -66,8 +82,7 @@ class BacktrackingSolver:
         """
 
         self.board = board
-        self.timeout = timeout
-        if timeout:
+        if self.timeout:
             self.start_time = time.time()
         try:
             self._backtrack()
@@ -98,3 +113,20 @@ class BacktrackingSolver:
 #         self.board = board
 #         self._backtrack()
 #         return self.board
+
+
+class SudokuSolver(Solver):
+    def __init__(self):
+        self.solver_dict = {
+            "backtracking": BacktrackingSolver,
+            # "backtracking_with_constraints": BacktrackingSolverWithConstraints,
+        }
+
+    def set_solver(self, solver: str, solver_kwargs):
+        try:
+            self.solver = self.solver_dict[solver](**solver_kwargs)
+        except KeyError:
+            raise ValueError(f"Solver {solver} is not valid")
+
+    def solve(self, board: SudokuBoard) -> Union[SudokuBoard, None]:
+        return self.solver.solve(board)

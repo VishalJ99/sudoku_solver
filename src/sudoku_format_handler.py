@@ -3,48 +3,170 @@ from exceptions import FormatError
 from abc import ABC, abstractmethod
 from typing import List
 from sudoku_board import SudokuBoard
-from utils import remove_whitespace_and_empty_lines, replace_dot_with_zero
 import os
+
+# TODO: think about how corrections are shown to the user
+# Think about replacing dots with zeros not being logged as a correction
 
 
 class FormatHandler(ABC):
+    """
+    An abstract base class for handling different formats of Sudoku boards.
+    """
+
     @abstractmethod
     def parse(self, input: str, input_type: str) -> SudokuBoard:
+        """
+        Parses the input into a SudokuBoard object.
+
+        This method must be implemented by subclasses.
+
+        Parameters
+        ----------
+        input : str
+            The input string or file path containing the Sudoku board.
+        input_type : str
+            The type of the input ('filepath' or 'string').
+
+        Returns
+        -------
+        SudokuBoard
+            The parsed Sudoku board.
+        """
         pass
 
     @abstractmethod
     def save(self, board: SudokuBoard, file: str):
+        """
+        Saves a SudokuBoard object to a file.
+
+        This method must be implemented by subclasses.
+
+        Parameters
+        ----------
+        board : SudokuBoard
+            The Sudoku board to be saved.
+        file : str
+            The file path where the board is to be saved.
+        """
         pass
 
     def _preprocess(self, board_input: str, input_type: str) -> List[str]:
-        # Load the input data into a common format of a list of strings
+        """
+        Performs preprocessing on the input data to prepare it for parsing.
+
+        Parameters
+        ----------
+        board_input : str
+            The input string or file path for the Sudoku board.
+        input_type : str
+            The type of input ('filepath' or 'string').
+
+        Returns
+        -------
+        List[str]
+            Preprocessed board data as a list of strings.
+        """
+        board_data = self._load_data(board_input, input_type)
+        board_data = self._remove_whitespace_and_empty_lines(board_data)
+        board_data = self._replace_dots_with_zeros(board_data)
+        return board_data
+
+    def _load_data(self, board_input: str, input_type: str) -> List[str]:
+        """
+        Loads the input data into a common format of a list of strings.
+
+        Parameters
+        ----------
+        board_input : str
+            The input string or file path for the Sudoku board.
+        input_type : str
+            The type of input ('filepath' or 'string').
+
+        Returns
+        -------
+        List[str]
+            Loaded data as a list of strings.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file is not found when input_type is 'filepath'.
+        TypeError
+            If the input_type is neither 'filepath' nor 'string'.
+        """
         if input_type == "filepath":
             if not os.path.exists(board_input):
                 raise FileNotFoundError(f"File not found: {board_input}")
-
             with open(board_input, "r") as f:
-                board_data = f.readlines()
+                return f.readlines()
 
         elif input_type == "string":
-            board_data = board_input.splitlines()
+            return board_input.splitlines()
 
         else:
-            raise TypeError("board_input must be a string or path to a file")
+            raise TypeError("Input type must be either 'filepath' or 'string'.")
 
-        # Perform some basic preprocessing on the input data
-        board_data = remove_whitespace_and_empty_lines(board_data)
-        board_data = replace_dot_with_zero(board_data)
-        return board_data
+    def _remove_whitespace_and_empty_lines(self, board_data: List[str]) -> List[str]:
+        """
+        Cleans up the board data by removing whitespace and empty lines.
+
+        Parameters
+        ----------
+        board_data : List[str]
+            The list of strings representing the board data.
+
+        Returns
+        -------
+        List[str]
+            The cleaned list of strings.
+        """
+        processed_board_data = []
+        for row in board_data:
+            row_ = "".join(row.split())
+            if not row_:
+                continue
+            processed_board_data.append(row_)
+
+        return processed_board_data
+
+    def _replace_dots_with_zeros(self, board_data: List[str]) -> List[str]:
+        """
+        Replaces all dots in the board data with zeros.
+
+        Parameters
+        ----------
+        board_data : List[str]
+            The list of strings representing the board data.
+
+        Returns
+        -------
+        List[str]
+            The list of strings with dots replaced by zeros.
+        """
+        return [row.replace(".", "0") for row in board_data]
 
 
 class GridFormatHandler(FormatHandler):
-    def _validate(self, board_data):
+    def _validate_rows(self, board_data):
+        # TODO: collect all errors and raise them at once
+        # TODO: Find a way to decouple error throwing from validation
         # validate row count
         if len(board_data) != 11:
-            error_message = "[ERROR] Input string does not have 11 rows\nInput string:\n"
-            for i, row in enumerate(board_data, start=1):
-                error_message += f"{i}: {row}\n"
-            raise FormatError(error_message)
+            error_message = f"Expected input board to have 11 rows, it has {len(board_data)}\n"
+            if len(board_data) > 81:
+                error_message += (
+                    "Input board is very long, may contain multiple puzzles\n"
+                    "this is not supported, please ensure only 1 board per input file"
+                )
+                raise FormatError(error_message)
+            else:
+                error_message += "Input Board:\n"
+                for i, row in enumerate(board_data, start=1):
+                    # add some padding to the line number to make it easier to read
+                    padding = " " * (3 - len(str(i)))
+                    error_message += f"{i}:{padding}{row}\n"
+                raise FormatError(error_message)
 
         # validate row format
         number_row_pattern = re.compile(r"^\d{3}\|\d{3}\|\d{3}$")
@@ -80,16 +202,16 @@ class GridFormatHandler(FormatHandler):
 
         return board_data, bad_line_ids
 
-    def _correct_row_format(self, board_data, bad_line_ids):
+    def _correct_rows(self, board_data, bad_line_ids):
         """
         Corrects the format of the input board for the given row indices.
         Prints a warning message to show the modifications made.
-
+        Expects _validate to have been called first, so that the bad_line_ids
+        are known to be correctable.
         Parameters
         ----------
             lines_to_correct (list): A list of line indices to correct.
         """
-
         for id_ in bad_line_ids:
             line = board_data[id_]
             if id_ % 4 == 3:  # Separator rows
@@ -105,11 +227,11 @@ class GridFormatHandler(FormatHandler):
     def parse(self, board_input: str, input_type: str) -> SudokuBoard:
         self._check_input_type_valid(board_input, input_type)
         board_data = self._preprocess(board_input, input_type)
-        board_data, bad_line_ids = self._validate(board_data)
+        board_data, bad_line_ids = self._validate_rows(board_data)
         if bad_line_ids:
-            board_data = self._correct_row_format(board_data, bad_line_ids)
-        board_data = self._parse_to_2d_int_list(board_data)
-        return SudokuBoard(board_data)
+            board_data = self._correct_rows(board_data, bad_line_ids)
+        board_array = self._parse_to_2d_int_list(board_data)
+        return SudokuBoard(board_array)
 
     def _check_input_type_valid(self, board_input: str, input_type: str = "filepath"):
         if input_type == "filepath":
@@ -119,19 +241,22 @@ class GridFormatHandler(FormatHandler):
                 return True
             else:
                 error_msg = (
-                    "[ERROR] Input file does not have a .txt extension\n",
-                    "Only support file input for text files, please see README.md",
+                    "[ERROR] Input file does not have a .txt extension. "
+                    "Only support file input for text files. Please see README.md"
+                    "for more information."
                 )
-                raise TypeError(error_msg)
+
+                raise ValueError(error_msg)
 
         elif isinstance(board_input, str):
             return True
         else:
             error_msg = (
-                "[ERROR] Input must be a string or path to a file\n",
-                "Only support file input for text files, please see README.md",
+                "[ERROR] Input must be a string or path to a file. "
+                "Only support file input for text files, please see README.md"
             )
-            raise TypeError(error_msg)
+
+            raise ValueError(error_msg)
 
     def save(self, board: SudokuBoard, file_path: str):
         """
@@ -147,10 +272,11 @@ class GridFormatHandler(FormatHandler):
         _, file_extension = os.path.splitext(file_path)
         if file_extension != ".txt":
             error_message = (
-                "[ERROR] Output file does not have a .txt extension\n",
-                "Only support file output for text files, please see README.md",
+                "[ERROR] Output file does not have a .txt extension\n"
+                "Only support file output for text files, please see README.md"
             )
-            raise TypeError(error_message)
+
+            raise ValueError(error_message)
 
         with open(file_path, "w") as file:
             for i in range(9):
@@ -187,11 +313,28 @@ class GridFormatHandler(FormatHandler):
 
 
 class FlatFormatHandler(FormatHandler):
-    def parse(self, input_data, input_type="filepath"):
-        # takes an a string of 81 digits and returns a 2D list of integers
-        # representing the board
-        input_data = self._preprocess(input_data, input_type)
-        input_data = input_data[0]
+    def parse(self, input_data, input_type="filepath") -> SudokuBoard:
+        """
+        Parses a flat format Sudoku board string into a SudokuBoard object.
+
+        Parameters
+        ----------
+        input_data : str
+            The Sudoku board input string or file path.
+        input_type : str
+            The type of input, either 'filepath' or 'string'.
+
+        Returns
+        -------
+        SudokuBoard
+            An instance of SudokuBoard parsed from the input.
+
+        Raises
+        ------
+        ValueError
+            If the input data is not valid.
+        """
+        input_data = self._preprocess(input_data, input_type)[0]
         self._check_valid_input(input_data)
 
         # convert the input string into a 2D list of integers
@@ -226,27 +369,87 @@ class FlatFormatHandler(FormatHandler):
 
 
 class SudokuFormatHandler:
-    def _get_handler(self, format: str):
-        handler_dict = {
+    """
+    Handles the parsing and saving of Sudoku boards in different formats.
+
+
+    Attributes
+    ----------
+    handler_dict : dict
+        A dictionary mapping format types to their respective handlers.
+    """
+
+    def __init__(self):
+        """
+        Initialises the SudokuFormatHandler with available format handlers.
+        """
+        # If a new format is added, add it to this dictionary
+        # Will automatically be made available as a command line argument option in main.py
+        self.handler_dict = {
             "grid": GridFormatHandler(),
             "flat": FlatFormatHandler(),
         }
 
-        # Check that specified format is supported.
-        if format not in handler_dict.keys():
-            error_message = (
-                f"[ERROR] Specified format: {format}, is not supported\n"
-                f"Currently supported formats: {list(handler_dict.keys())}\n"
-                "Please see README.md for more information."
+    def _get_handler(self, format: str):
+        """
+        Retrieves the handler for the specified format.
+
+        Parameters
+        ----------
+        format : str
+            The format type for which the handler is to be retrieved.
+
+        Returns
+        -------
+        handler
+            An instance of the handler corresponding to the specified format.
+
+        Raises
+        ------
+        KeyError
+            If the format type is unsupported.
+        """
+        try:
+            handler = self.handler_dict[format]
+            return handler
+        except KeyError:
+            raise KeyError(
+                f"Unsupported format type: {format}, options are: {list(self.handler_dict.keys())}"
             )
-            raise ValueError(error_message)
 
-        return handler_dict[format]
+    def parse(self, input: str, format: str, input_type: str = "filepath") -> SudokuBoard:
+        """
+        Parses a Sudoku board input into a SudokuBoard object.
 
-    def parse(self, input: str, format: str, input_type: str = "filepath"):
-        handler = self._get_handler(format)
-        return handler.parse(input, input_type)
+        Parameters
+        ----------
+        input : str
+            The Sudoku board input.
+        format : str
+            The format of the Sudoku board input.
+        input_type : str, optional
+            The type of input (e.g., 'filepath' or 'string'). Defaults to 'filepath'.
+
+        Returns
+        -------
+        SudokuBoard
+            An instance of SudokuBoard parsed from the input.
+        """
+        parse_handler = self._get_handler(format)
+        return parse_handler.parse(input, input_type)
 
     def save(self, board: SudokuBoard, format: str, file: str):
-        handler = self._get_handler(format)
-        handler.save(board, file)
+        """
+        Saves a SudokuBoard object to a file in the specified format.
+
+        Parameters
+        ----------
+        board : SudokuBoard
+            The SudokuBoard to be saved.
+        format : str
+            The format in which to save the board.
+        file : str
+            The file path where the board is to be saved.
+        """
+        save_handler = self._get_handler(format)
+        save_handler.save(board, file)
