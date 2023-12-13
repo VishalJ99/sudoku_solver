@@ -4,24 +4,27 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: ^(docs/|report/)
       - id: trailing-whitespace
+        exclude: ^(docs/|report/)
       - id: mixed-line-ending
+        exclude: ^(docs/|report/)
       - id: debug-statements
+        exclude: ^(docs/|report/)
   - repo: https://github.com/psf/black
     rev: 23.11.0
     hooks:
       - id: black
         language_version: python3.11
-        exclude: ^docs/
+        exclude: ^(docs/|report/)
       - id: black-jupyter
         language_version: python3.11
-        exclude: ^docs/
-
+        exclude: ^(docs/|report/)
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
       - id: flake8
-        exclude: ^docs/
+        exclude: ^(docs/|report/)
   - repo: local
     hooks:
       - id: testing

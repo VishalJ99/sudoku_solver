@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{float}
 
 % Set page margins
 \geometry{a4paper, margin=1in}
@@ -29,6 +30,7 @@
 \maketitle
 
 \tableofcontents
+
 \newpage
 
 \section{Introduction}
@@ -67,37 +69,64 @@ This project, centered on the development of a Sudoku solver, is primarily motiv
 The logical structure and deterministic nature of Sudoku make it an ideal candidate for exploring various algorithmic approaches, from brute-force methods to more sophisticated heuristic algorithms. Furthermore, the project offers a platform for implementing and refining software development practices, particularly in areas such as code clarity, modular design, and performance optimisation.
 
 In essence, the construction of a Sudoku solver serves not only as an exercise in algorithm implementation but also as a microcosm for broader software development and computational problem-solving skills. It provides a controlled environment to experiment with and evaluate different computational strategies, thereby contributing to a deeper understanding of both the specific problem of Sudoku and the general principles of algorithm design and optimization in computer science.
+\section{Problem Decomposition}
+To architect the Sudoku solver program, an initial flowchart was constructed to map out the high-level logical sequence. Each step of the flowchart was assigned a color based on its independence; steps that could be altered without impacting preceding steps received a unique color, whereas related, interdependent steps shared the same color. This method helped identify distinct, modular components within the program's workflow. The resulting color-coded flowchart is presented in Figure
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{figs/solver_flowchart.png}
+    \caption{High-level flowchart of the Sudoku solver program, illustrating the initial conceptual design. Functionally related modules are color-coded: orange for user interaction, yellow for format validation, cyan for board logic, and pink for solver logic components.}
+    \label{fig:solver_flowchart}
+\end{figure}
+The following modules were identified as the key components of the Sudoku solver:
+\begin{itemize}
+    \item User IO
+    \item Format Validation
+    \item Board logic
+    \item Solver logic
+\end{itemize}
+Each module is responsible for error handling of its respective component, and the modules are designed to be as independent as possible. Allowing for the easy replacement of one module with another, as long as the input and output of the module remain the same. This modular design allows for the easy testing of each module and the easy replacement of modules with more efficient ones. The next sections will detail the scope, design, implementation, and limitations of each module, as well as discuss their potential for future development.
 
-\section{Selection of Solution Algorithm}
+\section{User IO}
+\subsection{Scope}
+The User IO module is responsible for the interaction between the user and the program. It is the only module that interacts with the user, and it is responsible for the following tasks:
+\begin{itemize}
+    \item Collecting user input.
+    \item Validating user input.
+    \item Showing the output of the program.
+    \item Saving the output of the program.
+\end{itemize}
 
-The choice of an algorithm for solving Sudoku is predicated upon a set of criteria that balance efficiency, complexity, and the ability to effectively navigate the vast solution space inherent to the puzzle. The decision-making process encompassed an evaluation of several algorithmic paradigms, ultimately converging on the selection of the backtracking algorithm for its suitability to the problem at hand.
+\subsection{Design and Prototyping}
+It is ironic that this module which is presented first was actually the last module to be implemented since it required some time spent playing around with the other modules and trying to figure out the best way to call them.
 
-Backtracking, a depth-first search approach, was chosen primarily for its inherent simplicity and robustness in tackling constraint satisfaction problems such as Sudoku. This algorithm systematically explores the puzzle's grid, placing numbers in a trial-and-error manner and retracting (backtracking) erroneous placements, thereby navigating the solution space in a methodical and exhaustive manner. Its recursive nature allows for an elegant solution that can be implemented in a few lines of code, making it an ideal choice for the first iteration of the solver.
+The first step when designing this module for the code was to decide what the requirements were. The requirements were that the user should be able to input a Sudoku board in two ways:
+\begin{itemize}
+    \item Via a string.
+    \item Via a file.
 
-Alternative approaches, including heuristic-driven algorithms like stochastic search and constraint propagation, were also contemplated. While these methods offer potentially faster solutions by reducing the search space more strategically, they introduce a layer of complexity that may not align with the educational objectives of the coursework. The deterministic and transparent process of backtracking provides a more straightforward demonstration of the principles underpinning CSPs and aligns more closely with the coursework's emphasis on clarity and fundamental algorithmic understanding.
+The string input was added because often a new challenging board is recieved online the quickest way to input it is to copy and paste it from the source an
 
-In summary, the selection of backtracking as the solution algorithm is underpinned by its educational value, ease of implementation, and its alignment with the pedagogical goals of developing a deeper understanding of CSPs in a computationally efficient and conceptually clear manner.
+- string input
 
-\section{Prototyping}
-Conceptually the problem can be broken down into three distinct parts:
- - Parsing the input file into a data structure
- - Defining the sudoku board data structure
- - Defining a solver
+- collect arguments directly from cli vs passing them through a config
 
- The idea was
+- support
 
-\section{Choice of solving algorithm}
-\section{Development, Experimentation and Profiling}
-Describe the development process, including the experimentation with different algorithms or techniques and any profiling done for performance optimization.
+This module represents the main.py script and some functions in utilities.
 
-\section{Validation, Unit Tests and CI Setup}
-Explain how you validated the solution. Discuss the unit tests written for the project and any continuous integration setup.
+decision to implement it as functions defined in util and called in main.py vs class
 
-\section{Packaging and Usability}
-Detail how the project is packaged for use. Discuss any steps taken to ensure the usability of the software, including documentation.
+Want to make it easy to run sudokus from the command line, via string or via file. This is because a lot of times you see a board online or someone sends you the board via message so it would be nice to support string input so you could input from clipboard
 
-\section{Summary}
-Conclude with a summary of the project, key learnings, and possible future improvements.
+It will only validate the user input in ways that the fall outside the responsibilities of the other modules. For example, it will check that the user inputs a valid file path, but it will not check that the file contains a valid Sudoku board.
+
+ \dots
+
+this way once changes have been made on the back end, eg a new input file format class is added, a new solver class is added, if the user specifies it, nothing needs to change in main.py
+
+In future, more constraints will be added and solvers will become more complex, taking in more parameters to initialise and having more hyper parameters than just timeout. In which case future extensibility will be important. Add a config file that defines solver and modify main by adding a function to parse this. Rest of the arguments have little scope for extension in the future. At most if a new input format is to be supported it invovles just changing a single line in \dots
+
+
 
 % Uncomment the following two lines if you have references
 %\bibliographystyle{plain}
