@@ -30,3 +30,11 @@ repos:
         language: system
         files: ^test/ # ^ means "start with test/"
         always_run: true # run on all files, not just those staged otherwise it will not run unless you update the test file
+  # Ensures that the git commit hash is updated in the code
+  - repo: local
+    hooks:
+    -   id: update-git-commit-hash
+        name: Update Git Commit Hash
+        entry: git_hooks/update_git_commit_hash.sh
+        language: script
+        always_run: true
