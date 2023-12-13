@@ -100,9 +100,8 @@ def validate_args(args):
 
 
 def get_solver_kwargs(args):
-    # in the future, args will contain a path to a
-    # config file which will be parsed here to get
-    # the solver kwargs
+    # In the future, args will contain a path to a config file which will be parsed here to get
+    # the solver kwargs.
     solver_kwargs = {"timeout": args.timeout}
     return solver_kwargs
 
@@ -214,10 +213,10 @@ def main(args):
                 json.dump(output_summary_dict, f, indent=4)
 
     else:
-        # load board
+        # Load board.
         board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
 
-        # solve board
+        # Solve board.
         start_time = time.time()
         solved_board = solver.solve(board)
         solve_time = time.time() - start_time
@@ -236,13 +235,13 @@ def main(args):
             print("Time taken to solve: ", solve_time)
             print("Status: ", status)
 
-        # Save statistics to file. if save_stats is set
+        # Save statistics to file. if save_stats is set.
         if args.stats_path:
-            with open(args.save_stats, "w") as f:
-                f.write("git_commit_hash,", os.environ["GIT_COMMIT_HASH"])
-                f.write("args,", json.dumps(vars(args), indent=4))
-                f.write("Time (s),", solve_time)
-                f.write("Status,", status)
+            with open(args.stats_path, "w") as f:
+                f.write(f"git_commit_hash, {os.environ['GIT_COMMIT_HASH']}\n")
+                f.write(f"args, {json.dumps(vars(args))}\n")
+                f.write(f"Time (s), {solve_time}\n")
+                f.write(f"Status, {status}\n")
 
 
 if __name__ == "__main__":
