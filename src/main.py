@@ -3,6 +3,7 @@ import os
 import time
 from sudoku_format_handler import SudokuFormatHandler
 from sudoku_solvers import SudokuSolver
+import json
 
 
 def solve_sudoku(
@@ -116,17 +117,18 @@ def initialise_solver_and_format_handler(solver_kwargs):
 
 
 def main(args):
-    # Validate args.
     args = validate_args(args)
 
-    # Get solver kwargs.
     solver_kwargs = get_solver_kwargs(args)
 
-    # Initialise solver and format handler.
     format_handler, solver = initialise_solver_and_format_handler(solver_kwargs)
 
     # Initialise list tracking solve time and status.
     solve_stats = []
+
+    # If saving statistics, fetch git commit hash and save to environment variable.
+    if args.stats_path:
+        os.environ["GIT_COMMIT_HASH"] = os.popen("git rev-parse HEAD").read().strip()
 
     # Solve sudoku(s).
     if args.batch:
@@ -150,10 +152,10 @@ def main(args):
                 solved_board, args.input_format_type, output_file
             ) if solved_board else None
 
-            # Save benchmark results.
+            # Save run statistics.
             solve_stats.append((file, solve_time, status))
 
-        # Print summary statistics
+        # Calculate summary statistics.
         total_boards = len(solve_stats)
         timeout_count = sum(1 for _, _, status in solve_stats if status == "Timeout")
         solve_times = [time_taken for _, time_taken, status in solve_stats if status != "Timeout"]
@@ -169,7 +171,6 @@ def main(args):
             else 0
         )
 
-        # Print summary statistics.
         summary_stats = (
             f"Total Boards Attempted: {total_boards}\n"
             f"Boards that hit Timeout: {timeout_count}\n"
@@ -180,11 +181,26 @@ def main(args):
             f"Max Solve Time: {max_time:.7f} seconds\n"
             f"Standard Deviation of Solve Times: {std_deviation:.7f} seconds\n"
         )
+
         print("\nSummary Statistics:")
         print("-------------------")
         print(summary_stats)
 
-        # Save statistics to file.
+        # Put summary and other important run information into a dictionary.
+        output_summary_dict = {
+            "git_commit_hash": os.environ["GIT_COMMIT_HASH"],
+            "args": json.dumps(vars(args)),
+            "total_boards": total_boards,
+            "timeout_count": timeout_count,
+            "percentage_timeouts": timeout_count / total_boards * 100,
+            "average_solve_time": average_time,
+            "median_solve_time": median_time,
+            "min_solve_time": min_time,
+            "max_solve_time": max_time,
+            "std_deviation_solve_time": std_deviation,
+        }
+
+        # Save time statistics of each board to save_stats file.
         if args.stats_path:
             with open(args.stats_path, "w") as f:
                 f.write(
@@ -192,11 +208,10 @@ def main(args):
                     + "\n".join(",".join(str(x) for x in stat) for stat in solve_stats)
                 )
 
-            # create a summary file
-            with open(args.stats_path[:-4] + "_summary.txt", "w") as f:
-                f.write(f"GIT_COMMIT_HASH: {os.environ.get('GIT_COMMIT_HASH', 'N/A')}\n")
-                f.write(f"cli_args: {args}\n")
-                f.write(summary_stats)
+        # Save summary statistics to summary_stats json.
+        if args.stats_path:
+            with open(args.stats_path[:-4] + "_summary.json", "w") as f:
+                json.dump(output_summary_dict, f, indent=4)
 
     else:
         # load board
@@ -212,11 +227,6 @@ def main(args):
         if args.output_path and board:
             format_handler.save(board, args.out_format_type, args.output_path)
 
-        # Save statistics to file. if save_stats is set
-        if args.save_stats:
-            with open(args.save_stats, "w") as f:
-                f.write(f"{args.sudoku_input},{solve_time},{status}")
-
         if args.verbose:
             print("Input:")
             print(board)
@@ -225,6 +235,14 @@ def main(args):
             print("\nSummary Statistics:")
             print("Time taken to solve: ", solve_time)
             print("Status: ", status)
+
+        # Save statistics to file. if save_stats is set
+        if args.stats_path:
+            with open(args.save_stats, "w") as f:
+                f.write("git_commit_hash,", os.environ["GIT_COMMIT_HASH"])
+                f.write("args,", json.dumps(vars(args), indent=4))
+                f.write("Time (s),", solve_time)
+                f.write("Status,", status)
 
 
 if __name__ == "__main__":

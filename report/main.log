@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.12.7)  13 DEC 2023 13:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.12.7)  13 DEC 2023 13:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -283,7 +283,8 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 File: l3backend-pdftex.def 2023-01-16 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count294
 \l__pdf_internal_box=\box57
-) (./main.aux)
+)
+No file main.aux.
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
@@ -304,7 +305,6 @@ LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 28.
 LaTeX Font Info:    ... okay on input line 28.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 28.
 LaTeX Font Info:    ... okay on input line 28.
-
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -413,8 +413,8 @@ Package rerunfilecheck Info: Checksums for `main.out':
 ### semi simple group (level 1) entered at line 103 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 11259 strings out of 476025
- 174492 string characters out of 5790017
+ 11257 strings out of 476025
+ 174474 string characters out of 5790017
  1860388 words of memory out of 5000000
  31572 multiletter control sequences out of 15000+600000
  517717 words of font info for 51 fonts, out of 8000000 for 9000
