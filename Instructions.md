@@ -33,7 +33,7 @@ $ python src/solve_sudoku.py input.txt
 ```
 
 ## Criteria
-The goal of this coursework project is for you to demonstrate that you have mastered good software development practices and can utilise the modern tools described in the module `C1 Research Computing` to support your code development.  
+The goal of this coursework project is for you to demonstrate that you have mastered good software development practices and can utilise the modern tools described in the module `C1 Research Computing` to support your code development.
 
 You will need to demonstrate the following:
 - Writing clear readable code that is compliant with PEP8 style (for python)
@@ -50,7 +50,7 @@ You will not be marked on:
 Please **DO NOT** cut and paste code from existing solvers.  Remember I am not interested in the solution itself, but the quality of its creation.  Also, please remember the relevant section of the handbook that refers to use of ChatGPT in you academic work, specifically the following passage:
 
 
-"*Generation tools must be used transparently:* 
+"*Generation tools must be used transparently:*
  - *All use of auto-generation tools must be explicitly cited in every instance of their use.*
  - *This applies to generating code, whether used for prototyping, creation, reformatting, or any other purpose.  Students should add the citations to the README in home repository, and in any accompanying reports stating the prompts submitted, where the output was used, and how it was modified.*
  - *When used in conjunction with submitted reports for drafting, proofreading, suggesting alternative wordings, or for any other task it should be explicitly noted in an appendix to the report with the prompts submitted, where the output was used, and how it was modified.*

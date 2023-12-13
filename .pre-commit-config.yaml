@@ -19,6 +19,7 @@ repos:
         exclude: ^(docs/|report/)
       - id: black-jupyter
         language_version: python3.11
+        files: \.ipynb$
         exclude: ^(docs/|report/)
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0

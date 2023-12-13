@@ -6,9 +6,7 @@ from sudoku_solvers import SudokuSolver
 import json
 
 
-def solve_sudoku(
-    file_path, solver, format_handler, format_type, file_type, timeout, verbose=False
-):
+def solve_sudoku(file_path, solver, format_handler, format_type, file_type, timeout):
     board = format_handler.parse(file_path, format_type, file_type)
     start_time = time.time()
     solved_board = solver.solve(board)
@@ -56,10 +54,6 @@ def validate_args(args):
 
         # Conflicting argument checks.
         # ----------------------------
-        if args.verbose:
-            print("[INFO] Disabling verbose mode in batch mode")
-            args.verbose = False
-
         if args.input_type != "filepath":
             raise ValueError("input_type must be set to 'filepath' in batch mode")
 
@@ -142,7 +136,6 @@ def main(args):
                 args.input_format_type,
                 args.input_type,
                 args.timeout,
-                verbose=args.verbose,
             )
 
             # Save solved board.
@@ -215,6 +208,8 @@ def main(args):
     else:
         # Load board.
         board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
+        print("Input:")
+        print(board)
 
         # Solve board.
         start_time = time.time()
@@ -226,14 +221,12 @@ def main(args):
         if args.output_path and board:
             format_handler.save(board, args.out_format_type, args.output_path)
 
-        if args.verbose:
-            print("Input:")
-            print(board)
-            print("\nSolution:")
-            print(solved_board)
-            print("\nSummary Statistics:")
-            print("Time taken to solve: ", solve_time)
-            print("Status: ", status)
+        print("\nSolution:")
+        print(solved_board)
+
+        print("\nSummary Statistics:")
+        print("Time taken to solve: ", solve_time)
+        print("Status: ", status)
 
         # Save statistics to file. if save_stats is set.
         if args.stats_path:
@@ -312,12 +305,7 @@ if __name__ == "__main__":
         help="Maximum time allowed in seconds for solving a single board. Defaults to 10 seconds.\
           Must be a positive integer.",
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose mode to provide additional output details during solving process.\
-          Not allowed for batch mode.",
-    )
+
     parser.add_argument(
         "--solver",
         type=str,

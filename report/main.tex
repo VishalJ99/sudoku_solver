@@ -70,22 +70,31 @@ The logical structure and deterministic nature of Sudoku make it an ideal candid
 
 In essence, the construction of a Sudoku solver serves not only as an exercise in algorithm implementation but also as a microcosm for broader software development and computational problem-solving skills. It provides a controlled environment to experiment with and evaluate different computational strategies, thereby contributing to a deeper understanding of both the specific problem of Sudoku and the general principles of algorithm design and optimization in computer science.
 \section{Problem Decomposition}
-To architect the Sudoku solver program, an initial flowchart was constructed to map out the high-level logical sequence. Each step of the flowchart was assigned a color based on its independence; steps that could be altered without impacting preceding steps received a unique color, whereas related, interdependent steps shared the same color. This method helped identify distinct, modular components within the program's workflow. The resulting color-coded flowchart is presented in Figure
+To architect the Sudoku solver program, an initial flowchart was constructed to map out the high-level logical sequence. Each step of the flowchart was assigned a color based on its independence; steps that could be altered without impacting preceding steps received a unique color, whereas related, interdependent steps shared the same color. This method helped identify distinct, modular components within the program's workflow. The resulting color-coded flowchart is presented in Figure \ref{fig:solver_flowchart}.
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.82\textwidth]{figs/solver_flowchart.png}
-    \caption{High-level flowchart of the Sudoku solver program, illustrating the initial conceptual design. Functionally related modules are color-coded: orange for user interaction, yellow for format validation, cyan for board logic, and pink for solver logic components.}
-    \label{fig:solver_flowchart}
+\centering
+\includegraphics[width=0.82\textwidth]{figs/solver_flowchart.png}
+\caption{High-level flowchart of the Sudoku solver program, illustrating the initial conceptual design. Functionally related modules are color-coded: orange for user interaction, yellow for format validation, cyan for board logic, and pink for solver logic components.}
+\label{fig:solver_flowchart}
 \end{figure}
-The following modules were identified as the key components of the Sudoku solver:
-\begin{itemize}
-    \item User IO
-    \item Format Validation
-    \item Board logic
-    \item Solver logic
-\end{itemize}
-Each module is responsible for error handling of its respective component, and the modules are designed to be as independent as possible. Allowing for the easy replacement of one module with another, as long as the input and output of the module remain the same. This modular design allows for the easy testing of each module and the easy replacement of modules with more efficient ones. The next sections will detail the scope, design, implementation, and limitations of each module, as well as discuss their potential for future development.
 
+The analysis led to the identification of the following key modular components in the Sudoku solver:
+
+\begin{itemize}
+\item \textbf{User IO:} Responsible for user interaction and input/output processing.
+\item \textbf{Format Validation:} Ensures the correctness of the input format.
+\item \textbf{Board Logic:} Manages the internal representation and manipulation of the Sudoku board.
+\item \textbf{Solver Logic:} Implements the algorithms to solve the Sudoku puzzle.
+\end{itemize}
+
+Moreover, the following areas were identified as key areas in which the program might be extended in the future:
+\begin{itemize}
+\item Introduction of additional input formats.
+\item Integration of more sophisticated solver algorithms.
+\item Adaptation to alternative Sudoku board representations.
+\end{itemize}
+
+Each module is purposefully designed to operate independently, minimising inter-module dependencies. This approach not only facilitates ease of modification and maintenance but also allows for isolated testing and enhancement of individual components. Error handling is strategically implemented within each module, focusing on specific functional requirements. To ensure system-wide robustness, some error checks are intentionally overlapped across modules. The following sections will delve into the scope, design, implementation, and constraints of each module, along with a discussion on their potential for future enhancements.
 \section{User IO}
 \subsection{Scope}
 The User IO module is responsible for the interaction between the user and the program. It is the only module that interacts with the user, and it is responsible for the following tasks:
@@ -99,34 +108,29 @@ The User IO module is responsible for the interaction between the user and the p
 \subsection{Design and Prototyping}
 It is ironic that this module which is presented first was actually the last module to be implemented since it required some time spent playing around with the other modules and trying to figure out the best way to call them.
 
-The first step when designing this module for the code was to decide what the requirements were. The requirements were that the user should be able to input a Sudoku board in two ways:
-\begin{itemize}
-    \item Via a string.
-    \item Via a file.
+The first step when designing this module was to think about what the were the ways in which the user might want to call the sudoku solver. 
 
-The string input was added because often a new challenging board is recieved online the quickest way to input it is to copy and paste it from the source an
+It should be easy to take an input sudoku board file and solve it, you do not want to specify many parameters each time just to run a quick solving task. 
 
-- string input
+While designing the program, often a board would be found online and having to save it to a file first and pointing the solver to it was a repeated pain. It is therefore desirable to be able to take in a string of a sudoku board from main.primarily
 
-- collect arguments directly from cli vs passing them through a config
+the module should also be independant of changes to the back end. If a new solver is added or if support for a new input format is added on the back end, the user should be able to simply select these as options from the cli args.
 
-- support
+There are 2 ways in which the script could be called. One is for single input, where a single sudoku board is passed as input and a solution is desired.
 
-This module represents the main.py script and some functions in utilities.
+Another is for batch testing where one may want to test the performance of a new solver or board representation against a dataset of boards.
 
-decision to implement it as functions defined in util and called in main.py vs class
+In the case of batch testing there are also some other desires, eg the desire to save outputs, output time statistics. 
 
-Want to make it easy to run sudokus from the command line, via string or via file. This is because a lot of times you see a board online or someone sends you the board via message so it would be nice to support string input so you could input from clipboard
+Currently at the time of writing this report the solvers are quite basic and only require a single argument to be initialised - the timeout arg. However, in the future the solvers may grow more complex and as such the number of parameters required to initialise them may grow and may become more specific to a solver. As such in the future the best way to handle this would be to put all solver specific parameters in a config file and load that config file. There is a specific space in the main.py where this logic lives. 
 
-It will only validate the user input in ways that the fall outside the responsibilities of the other modules. For example, it will check that the user inputs a valid file path, but it will not check that the file contains a valid Sudoku board.
+Another desired feature is reproducability of runs, especially when trying to compare performances of different versions of the solver, it should be possible to reproduce a run from the output summary json. As such the git commit hash and arguments of the run are saved as well.
 
- \dots
+The main function works as following. It was decided not to implement the module as a class but rather as a main.py script which has functions instead of methods. <justify this>
 
-this way once changes have been made on the back end, eg a new input file format class is added, a new solver class is added, if the user specifies it, nothing needs to change in main.py
+The $main.py$ script collects user args via arg parse. It is made so that rapid prototyping is possible where if a user just wants to quickly solve a puzzle the only required arguments are the puzzle input. if the puzzle input is set as a string then the optional $--input_type$ flag. must be set to str. 
 
-In future, more constraints will be added and solvers will become more complex, taking in more parameters to initialise and having more hyper parameters than just timeout. In which case future extensibility will be important. Add a config file that defines solver and modify main by adding a function to parse this. Rest of the arguments have little scope for extension in the future. At most if a new input format is to be supported it invovles just changing a single line in \dots
-
-
+This is the fastest way to check that a given solver 
 
 % Uncomment the following two lines if you have references
 %\bibliographystyle{plain}
