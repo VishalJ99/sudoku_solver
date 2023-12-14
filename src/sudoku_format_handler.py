@@ -12,6 +12,12 @@ import os
 class FormatHandler(ABC):
     """
     An abstract base class for handling different formats of Sudoku boards.
+
+    A FormatHandler is responsible for parsing and saving Sudoku boards from a specific
+    format. It must implement the parse and save methods.
+
+    Common preprocessing steps are implemented in this class and are expected to be called
+    by subclasses in their parse method. These steps are expected to be common to all formats.
     """
 
     @abstractmethod
@@ -19,41 +25,63 @@ class FormatHandler(ABC):
         """
         Parses the input into a SudokuBoard object.
 
-        This method must be implemented by subclasses.
+        This method must be implemented by subclasses. The method should handle
+        errors in input format gracefully, throwing relevant exceptions.
 
         Parameters
         ----------
         input : str
-            The input string or file path containing the Sudoku board.
+            The string representation of the Sudoku board or a file path containing the board.
         input_type : str
-            The type of the input ('filepath' or 'string').
+            The type of the input: 'filepath' for file paths and 'string' for direct string inputs.
 
         Returns
         -------
         SudokuBoard
             The parsed Sudoku board.
+
+        Examples
+        --------
+        >>> handler.parse("path/to/board.txt", "filepath")
+        SudokuBoard(...)
+        >>> handler.parse("4...3....", "string")
+        SudokuBoard(...)
         """
         pass
 
     @abstractmethod
-    def save(self, board: SudokuBoard, file_path: str):
+    def save(self, board: SudokuBoard, file_path: str) -> None:
         """
         Saves a SudokuBoard object to a file.
 
-        This method must be implemented by subclasses.
+        This method must be implemented by subclasses and should handle file-related errors.
 
         Parameters
         ----------
         board : SudokuBoard
             The Sudoku board to be saved.
-        file : str
+        file_path : str
             The file path where the board is to be saved.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> handler.save(board, "path/to/save.txt")
+
         """
         pass
 
     def _preprocess(self, board_input: str, input_type: str) -> List[str]:
         """
-        Performs preprocessing on the input data to prepare it for parsing.
+        Performs common preprocessing steps on the input data to prepare it for parsing.
+        The methods called here are expected to be common to all formats.
+        This method is expected to be the first called in the parse method of any FormatHandler
+        subclass. As this method takes the input of the parse method, the input file path or
+        string input and returns a list of strings representing the board data which can then be
+        further validated and corrected before being parsed into a SudokuBoard object.
 
         Parameters
         ----------
@@ -67,6 +95,7 @@ class FormatHandler(ABC):
         List[str]
             Preprocessed board data as a list of strings.
         """
+        # Add any common preprocessing steps here
         board_data = self._load_data(board_input, input_type)
         board_data = self._remove_whitespace_and_empty_lines(board_data)
         board_data = self._replace_dots_with_zeros(board_data)
@@ -74,19 +103,25 @@ class FormatHandler(ABC):
 
     def _load_data(self, board_input: str, input_type: str) -> List[str]:
         """
-        Loads the input data into a common format of a list of strings.
+        Loads the input data into a common format of a list of strings, based on the input type.
+
+        If the input type is 'filepath', the method reads the file at the given path and returns
+        its contents as a list of strings. If the input type is 'string', it splits the input
+        string into lines and returns the list of these lines.
 
         Parameters
         ----------
         board_input : str
-            The input string or file path for the Sudoku board.
+            The input string or file path for the Sudoku board. If it's a file path,
+            the file should be readable and in a format that can be split into lines.
         input_type : str
-            The type of input ('filepath' or 'string').
+            The type of input: 'filepath' for a file path, and 'string' for a direct string
+            representation of the Sudoku board.
 
         Returns
         -------
         List[str]
-            Loaded data as a list of strings.
+            Loaded data as a list of strings, representing the Sudoku board.
 
         Raises
         ------
@@ -94,6 +129,13 @@ class FormatHandler(ABC):
             If the specified file is not found when input_type is 'filepath'.
         TypeError
             If the input_type is neither 'filepath' nor 'string'.
+
+        Examples
+        --------
+        >>> self._load_data("path/to/board.txt", "filepath")
+        ["530070000", "600195000", ...]  # Example output for a file
+        >>> self._load_data("530070000\n600195000", "string")
+        ["530070000", "600195000"]  # Example output for a string
         """
         if input_type == "filepath":
             if not os.path.exists(board_input):
