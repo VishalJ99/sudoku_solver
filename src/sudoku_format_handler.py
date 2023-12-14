@@ -202,6 +202,12 @@ class GridFormatHandler(FormatHandler):
                     "this is not supported, please ensure only 1 board per input file"
                 )
                 raise FormatError(error_message)
+            elif len(board_data) == 1:
+                error_message += (
+                    "Input board is one line, if you meant to run with the flat format handler\n"
+                    "please specify --input_format_type flat when running the program"
+                )
+                raise FormatError(error_message)
             else:
                 error_message += "Input Board:\n"
                 for i, row in enumerate(board_data, start=1):
