@@ -15,6 +15,8 @@ class SudokuBoard:
         A 2D array representing the current state of the Sudoku board.
     _original_board : np.ndarray
         A 2D array representing the original state of the Sudoku board.
+    _all_possible_values : set
+        A set containing all possible values that can be placed in the Sudoku board.
     rows : list of set
         A list containing sets, each representing numbers present in each row of the board.
     columns : list of set
@@ -106,6 +108,7 @@ class SudokuBoard:
         This method is typically called during the initialisation of the SudokuBoard to set up
         the initial list of row, column and subgrid set attributes of the board.
         """
+        self._all_possible_values = set(range(1, 10))
         for i in range(9):
             for j in range(9):
                 num = self._board[i][j]
@@ -345,32 +348,39 @@ class SudokuBoard:
         self.subgrids[(row // 3) * 3 + (col // 3)].remove(num)
         self.filled_values -= 1
 
-    def get_related_cell_values(self, row: int, col: int) -> Set[int]:
+    def find_possible_cell_values(self, row: int, col: int) -> Set[int]:
         """
-        Finds values in cells that are related to the given cell.
-        Related cells are those in the same row, column, or 3x3 subgrid.
+        Determines the possible values that can be placed in a specific cell of the Sudoku board.
+        It considers the values  present in the cell's row, column, and 3x3 subgrid.
 
         Parameters
         ----------
-        row : int The row index of the cell.
-        col : int: The column index of the cell.
+        row : int
+            The row index of the cell.
+        col : int
+            The column index of the cell.
 
         Returns
         -------
-        Set[int] A set of values in cells that are related to the given cell.
+        Set[int]
+            A set of integers representing the possible values that can be placed in the cell.
 
         Raises
         ------
         ValueError
-            If the specified position is invalid.
+            If the specified row or column index is outside the valid range of the Sudoku board.
         """
-        related = set()
-        related.update(self.rows[row])
-        related.update(self.columns[col])
-        related.update(self.subgrids[(row // 3) * 3 + (col // 3)])
-        return related
+        # Gather values already present in the same row, column, and subgrid.
+        existing_values = set()
+        existing_values.update(self.rows[row])
+        existing_values.update(self.columns[col])
+        existing_values.update(self.subgrids[(row // 3) * 3 + (col // 3)])
 
-    def get_empty_cells(self) -> Optional[Tuple[int, int]]:
+        # Calculate the set of values that are not yet present in related cells.
+        potential_values = self._all_possible_values - existing_values
+        return potential_values
+
+    def get_empty_cells(self) -> Optional[Tuple[List[int], List[int]]]:
         """
         Finds the indices for the empty squares in the board
         order they are returned in is from left to right, top to bottom.

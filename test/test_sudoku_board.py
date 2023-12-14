@@ -135,6 +135,6 @@ def test_get_related_method():
     INPUT = "test/sudoku_solver_test_boards/hard.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
-    vals = board.get_related_cell_values(0, 0)
-    expected_vals = set([5, 1])
+    vals = board.find_possible_cell_values(0, 0)
+    expected_vals = set([2, 3, 4, 6, 7, 8, 9])
     assert vals == expected_vals
