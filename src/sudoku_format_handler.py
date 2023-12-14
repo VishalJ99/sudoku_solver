@@ -459,7 +459,7 @@ class SudokuFormatHandler(FormatHandler):
                 f"Unsupported format type: {format}, options are: {list(self.handler_dict.keys())}"
             )
 
-    def parse(self, input: str, format: str, input_type: str = "filepath") -> SudokuBoard:
+    def parse(self, input: str, format: str = "grid", input_type: str = "filepath") -> SudokuBoard:
         """
         Parses a Sudoku board input into a SudokuBoard object.
 
