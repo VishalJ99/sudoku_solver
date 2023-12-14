@@ -36,7 +36,7 @@ class FormatHandler(ABC):
         pass
 
     @abstractmethod
-    def save(self, board: SudokuBoard, file: str):
+    def save(self, board: SudokuBoard, file_path: str):
         """
         Saves a SudokuBoard object to a file.
 
@@ -368,7 +368,7 @@ class FlatFormatHandler(FormatHandler):
             raise ValueError("Input must be 81 characters long")
 
 
-class SudokuFormatHandler:
+class SudokuFormatHandler(FormatHandler):
     """
     Handles the parsing and saving of Sudoku boards in different formats.
 
