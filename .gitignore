@@ -19,3 +19,9 @@ sandbox.ipynb
 *benchmark*
 
 *solver_test_dir*
+
+
+# dont track report 
+report/*
+!report/main.tex
+!report/fig/
