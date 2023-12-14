@@ -129,3 +129,12 @@ def test_check_valid_method():
     board = format_handler.parse(INPUT, format="grid")
     assert board.check_valid(0, 2, 3)
     assert not board.check_valid(0, 2, 5)
+
+
+def test_get_related_method():
+    INPUT = "test/sudoku_solver_test_boards/hard.txt"
+    format_handler = SudokuFormatHandler()
+    board = format_handler.parse(INPUT, format="grid")
+    vals = board.get_related_cell_values(0, 0)
+    expected_vals = set([5, 1])
+    assert vals == expected_vals

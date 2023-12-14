@@ -146,21 +146,14 @@ class SudokuBoard:
         self.subgrids[(row // 3) * 3 + (col // 3)].remove(num)
         self.filled_values -= 1
 
-    def get_related(self):
+    def get_related_cell_values(self, row, col):
         """
-        Finds the related squares to the current square.
-        Related squares are squares in the same row, column, or subgrid as the current square.
-
-        Returns
-        -------
-        list
-            List of tuples containing the row and column indices of the related squares
+        Finds values in cells that are related to the given cell.
         """
         related = set()
-        for i in range(9):
-            for j in range(9):
-                if self._board[i][j] == 0:
-                    related.add((i, j))
+        related.update(self.rows[row])
+        related.update(self.columns[col])
+        related.update(self.subgrids[(row // 3) * 3 + (col // 3)])
         return related
 
     def get_empty_cells(self):
