@@ -120,11 +120,35 @@ class SudokuBoard:
         """
         self._board = copy.deepcopy(self._original_board)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Formats the string representation of the board in a visually appealing format
-        Use a . for a blank square instead of a 0.
-        Add some whitespace between the 3x3 squares.
+        Use a . for a blank square instead of a 0 and adds some whitespace between the 3x3 squares.
+
+        Examples
+        --------
+        >>> import sys
+        >>> sys.path.append('src')
+        >>> from sudoku_format_handler import SudokuFormatHandler
+        >>> format_handler = SudokuFormatHandler()
+        >>> board = format_handler.parse("test/sudoku_solver_test_boards/easy_1.txt")
+        >>> print(type(board))
+        <class 'sudoku_board.SudokuBoard'>
+        >>> print(board)
+
+        The output will be:
+
+        9 1 . | . . . | 4 2 7
+        . . . | . . 3 | 9 1 5
+        2 5 4 | 7 . . | 6 8 .
+        ------+-------+------
+        4 7 . | . 8 6 | . 3 2
+        . 6 . | 4 . . | . . 8
+        5 . . | . 1 2 | . 6 .
+        ------+-------+------
+        3 4 . | 6 2 . | . . 1
+        . . . | 3 . . | . . .
+        . 2 6 | . . 8 | . . 9
         """
         board_str = ""
         for i in range(9):
