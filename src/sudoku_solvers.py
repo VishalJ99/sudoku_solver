@@ -13,7 +13,7 @@ class Solver(ABC):
         pass
 
 
-class BacktrackingSolver(Solver):
+class BacktrackingSolverBasic(Solver):
     """
     Class for solving Sudoku puzzles using a backtracking algorithm.
 
@@ -123,7 +123,7 @@ class BacktrackingSolver(Solver):
             return None, "Timeout occurred"
 
 
-class BacktrackingSolverEasiestFirst(BacktrackingSolver):
+class BacktrackingSolverEasiestFirst(BacktrackingSolverBasic):
     """
     Class for solving Sudoku puzzles using a backtracking algorithm, with a heuristic that
     chooses the cell with the fewest possible options at each step and only loops over those
@@ -278,7 +278,7 @@ class SudokuSolver(Solver):
         # If a new solver is added, add it to this dictionary.
         # Will automatically be available as an option via the --solver flag in main.py.
         self.solver_dict = {
-            "bt_basic": BacktrackingSolver,
+            "bt_basic": BacktrackingSolverBasic,
             "bt_easiest_first": BacktrackingSolverEasiestFirst,
         }
 

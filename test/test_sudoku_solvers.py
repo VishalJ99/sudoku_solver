@@ -1,5 +1,5 @@
 from sudoku_format_handler import SudokuFormatHandler
-from sudoku_solvers import BacktrackingSolver
+from sudoku_solvers import BacktrackingSolverBasic
 import os
 import pytest
 
@@ -14,7 +14,7 @@ def setup_solver_and_board():
     format_handler = SudokuFormatHandler()
 
     board = format_handler.parse(EASY_BOARD_1_PATH, format="grid")
-    bt_solver = BacktrackingSolver(timeout=10)
+    bt_solver = BacktrackingSolverBasic(timeout=10)
 
     yield board, bt_solver, EASY_BOARD_1_SOLUTION_PATH, TEST_SAVE_PATH
 
