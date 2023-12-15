@@ -31,7 +31,7 @@ def test_backtracking_solver(setup_solver_and_board):
     with open(known_solution_path, "r") as f:
         known_solution = f.read()
 
-    solved_board = bt_solver.solve(board)
+    solved_board, status = bt_solver.solve(board)
     format_handler.save(solved_board, "grid", test_save_path)
 
     with open(test_save_path, "r") as f:
