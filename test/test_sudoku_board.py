@@ -43,38 +43,27 @@ def test_board_representation():
     assert np.array_equal(board._board, expected_answer)
 
 
-def test_get_set():
+def test_place_remove_number_and_getter():
     # Check that the board can be indexed like a numpy array.
     # Check the error handling for invalid values.
     INPUT = "test/sudoku_parser_test_boards/good_input.txt"
-    expected_answer = np.asarray(
-        [
-            [0, 0, 0, 0, 0, 7, 0, 0, 0],
-            [0, 0, 0, 0, 0, 9, 5, 0, 4],
-            [0, 0, 0, 0, 5, 0, 1, 6, 9],
-            [0, 8, 0, 0, 0, 0, 3, 0, 5],
-            [0, 7, 5, 0, 0, 0, 2, 9, 0],
-            [4, 0, 6, 0, 0, 0, 0, 8, 0],
-            [7, 6, 2, 0, 8, 0, 0, 0, 0],
-            [1, 0, 3, 9, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 0, 0, 0, 0, 0],
-        ]
-    )
+
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
 
-    # Test setter.
-    board[0, 0] = 1
-    expected_answer[0, 0] = 1
-    assert np.array_equal(board._board, expected_answer)
-
-    # Test getter.
-    assert board[0, 0] == 1
-
     # Test that the board cannot be set to an invalid value.
     with pytest.raises(ValueError):
-        board[0, 0] = 10
-        board[0, 0] = 1.1
+        board.place_number(0, 0, 10)
+        board.place_number(0, 0, 0.2)
+        board.place_number(0, 0, -1)
+        # Invalid move.
+        board.place_number(0, 0, 1)
+
+    # Test that the board can be set to a valid value.
+    board.place_number(0, 0, 2)
+
+    # Test the board can be indexed like a numpy array.
+    assert board[0, 0] == 2
 
 
 def test_print_formatting():
@@ -103,18 +92,17 @@ def test_print_formatting():
 
 
 def test_reset_method():
-    # Check that the board can be reset to its original state
+    # Check that the board can be reset to its original state.
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
-
     board = format_handler.parse(INPUT, format="grid")
-    board[0, 0] = 1
+    board.place_number(0, 2, 3)
     board.reset()
     assert np.array_equal(board._board, board._original_board)
 
 
 def test_find_empty_method():
-    # Check that the board can find the next empty space
+    # Check that the board can find the next empty space.
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
@@ -123,7 +111,7 @@ def test_find_empty_method():
 
 
 def test_check_valid_method():
-    # Check that the board can check if a move is valid
+    # Check that the board can check if a move is valid.
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
@@ -132,6 +120,8 @@ def test_check_valid_method():
 
 
 def test_get_related_method():
+    # Check that the board can find the options available to a cell
+    # given values filled in related cells.
     INPUT = "test/sudoku_solver_test_boards/hard.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
