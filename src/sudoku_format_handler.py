@@ -432,7 +432,7 @@ class SudokuFormatHandler(FormatHandler):
         Initialises the SudokuFormatHandler with available format handlers.
         """
         # If a new format is added, add it to this dictionary
-        # Will automatically be made available as a command line argument option in main.py
+        # Will automatically be available via the --input(/output)_format_type flag in main.py.
         self.handler_dict = {
             "grid": GridFormatHandler(),
             "flat": FlatFormatHandler(),
