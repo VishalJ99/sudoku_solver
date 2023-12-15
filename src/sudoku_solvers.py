@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from sudoku_board import SudokuBoard
 from typing import Optional, List, Set, Tuple
 import copy
+import numpy as np
 
 
 class Solver(ABC):
@@ -113,13 +114,13 @@ class BacktrackingSolver(Solver):
 
         try:
             self._backtrack()
-            if original_board == self.board:
+            if np.array_equal(original_board._board, self.board._board):
                 # Input board has no solution.
-                return None, "No solution"
+                return None, "Board has no solution"
             else:
                 return self.board, "Solved"
         except TimeoutException:
-            return None, "Timeout"
+            return None, "Timeout occurred"
 
 
 class BacktrackingSolverEasiestFirst(BacktrackingSolver):

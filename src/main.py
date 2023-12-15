@@ -213,21 +213,25 @@ def main(args):
                 json.dump(output_summary_dict, f, indent=4)
 
     else:
-        # Load board.
-        board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
-        print("Input:")
-        print(board)
-
-        # Solve board.
-        start_time = time.time()
-        solved_board = solver.solve(board)
-        solve_time = time.time() - start_time
-        status = "Solved" if board else "Timeout"
+        solved_board, solve_time, status = solve_sudoku(
+            args.sudoku_input,
+            solver,
+            format_handler,
+            args.input_format_type,
+            args.input_type,
+            args.timeout,
+        )
 
         # If board was solved and output path is set, save the solved board.
-        if args.output_path and board:
-            format_handler.save(board, args.out_format_type, args.output_path)
+        if args.output_path and solved_board:
+            format_handler.save(solved_board, args.out_format_type, args.output_path)
 
+        # TODO: improve this logic. Feels hacky.
+        # In single mode explictly load board from file for printing to console.
+        board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
+
+        print("\nInput Board:")
+        print(board)
         print("\nSolution:")
         print(solved_board)
 
