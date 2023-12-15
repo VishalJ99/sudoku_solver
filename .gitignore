@@ -16,12 +16,14 @@ sandbox.ipynb
 # csv
 *.csv
 
-*benchmark*
 
 *solver_test_dir*
 
 
-# dont track report 
+# dont track report
 report/*
 !report/main.tex
 !report/fig/
+
+# dont track solver output
+solver_out*
