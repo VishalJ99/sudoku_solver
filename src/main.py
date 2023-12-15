@@ -41,15 +41,14 @@ def validate_args(args):
 
         # Output path checks.
         # ------------------
-        if not args.output_path:
-            raise ValueError("Output path is required in batch mode")
-        elif os.path.exists(args.output_path) and not os.path.isdir(args.output_path):
-            raise ValueError("Output path must be a directory in batch mode")
-        elif os.path.exists(args.output_path) and os.listdir(args.output_path):
-            raise ValueError("Output directory must be empty in batch mode")
-        elif not os.path.exists(args.output_path):
-            print("[INFO] Output directory does not exist... Creating output directory")
-            os.makedirs(args.output_path)
+        if args.output_path:
+            if os.path.exists(args.output_path) and not os.path.isdir(args.output_path):
+                raise ValueError("Output path must be a directory in batch mode")
+            elif os.path.exists(args.output_path) and os.listdir(args.output_path):
+                raise ValueError("Output directory must be empty in batch mode")
+            elif not os.path.exists(args.output_path):
+                print("[INFO] Output directory does not exist... Creating output directory")
+                os.makedirs(args.output_path)
 
         # Conflicting argument checks.
         # ----------------------------
@@ -142,22 +141,26 @@ def main(args):
                 args.input_type,
                 args.timeout,
             )
+            # print every len(sudoku_files) / 100 boards.
 
             print(f"\rSolved {idx}/{len(sudoku_files)} boards", end="")
 
-            # Save solved board.
-            output_file = os.path.join(args.output_path, f"solved_{file}")
-            format_handler.save(
-                solved_board, args.output_format_type, output_file
-            ) if solved_board else None
+            if args.output_path:
+                # Save solved board.
+                output_file = os.path.join(args.output_path, f"solved_{file}")
+                format_handler.save(
+                    solved_board, args.output_format_type, output_file
+                ) if solved_board else None
 
             # Save run statistics.
             solve_stats.append((file, solve_time, status))
 
         # Calculate summary statistics.
         total_boards = len(solve_stats)
-        timeout_count = sum(1 for _, _, status in solve_stats if status == "Timeout")
-        solve_times = [time_taken for _, time_taken, status in solve_stats if status != "Timeout"]
+        timeout_count = sum(1 for _, _, status in solve_stats if "timeout" in status.lower())
+        solve_times = [
+            time_taken for _, time_taken, status in solve_stats if "timeout" not in status.lower()
+        ]
 
         # If all boards timed out, set all time related statistic values to 0.
         average_time = sum(solve_times) / len(solve_times) if solve_times else 0
