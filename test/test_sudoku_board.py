@@ -122,9 +122,9 @@ def test_check_valid_method():
 def test_get_related_method():
     # Check that the board can find the options available to a cell
     # given values filled in related cells.
-    INPUT = "test/sudoku_solver_test_boards/hard.txt"
+    INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
-    vals = board.find_possible_cell_values(0, 0)
-    expected_vals = set([2, 3, 4, 6, 7, 8, 9])
+    vals = board.find_possible_cell_values(0, 2)
+    expected_vals = set([3, 8])
     assert vals == expected_vals
