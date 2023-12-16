@@ -1,0 +1,12 @@
+{
+    "git_commit_hash": "21271b33f8cd912e507d92691ae5fe03f0e559fc",
+    "args": "{\"sudoku_input\": \"/Users/vishaljain/Downloads/million_sudokus\", \"batch\": true, \"input_type\": \"filepath\", \"input_format_type\": \"flat\", \"output_path\": null, \"output_format_type\": \"grid\", \"stats_path\": \"solver_output/million_sudoku_ef_bt_stats.txt\", \"timeout\": 10, \"solver\": \"bt_easiest_first\"}",
+    "total_boards": 1000000,
+    "timeout_count": 0,
+    "percentage_timeouts": 0.0,
+    "average_solve_time": 0.0012985699951648712,
+    "median_solve_time": 0.0012829303741455078,
+    "min_solve_time": 0.0010828971862792969,
+    "max_solve_time": 0.13955998420715332,
+    "std_deviation_solve_time": 0.00026067918982598863
+}
