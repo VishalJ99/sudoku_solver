@@ -1,4 +1,4 @@
-from sudoku_format_handler import SudokuFormatHandler
+from sudoku_format_handlers import SudokuFormatHandler
 from sudoku_board import SudokuBoard
 from exceptions import FormatError
 import pytest

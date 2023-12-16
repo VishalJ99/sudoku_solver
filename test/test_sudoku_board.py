@@ -1,4 +1,4 @@
-from sudoku_format_handler import SudokuFormatHandler
+from sudoku_format_handlers import SudokuFormatHandler
 import pytest
 import numpy as np
 

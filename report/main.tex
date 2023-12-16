@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{float}
+\usepackage{subcaption}
 
 % Set page margins
 \geometry{a4paper, margin=1in}
@@ -72,9 +73,9 @@ To architect the Sudoku solver program, an initial flowchart was constructed to 
 The analysis led to the identification of the following key modular components in the Sudoku solver:
 
 \begin{itemize}
-\item \textbf{User IO:} Responsible for user interaction and input/output processing.
+\item \textbf{User IO:} Handles user interaction and input/output processing.
 \item \textbf{Format Validation:} Ensures the correctness of the input format.
-\item \textbf{Board Logic:} Manages the internal representation and manipulation of the Sudoku board.
+\item \textbf{Board Logic:} Converts input Sudoku boards into a standardised internal format suitable for efficient manipulation.
 \item \textbf{Solver Logic:} Implements the algorithms to solve the Sudoku puzzle.
 \end{itemize}
 
@@ -82,29 +83,54 @@ The analysis led to the identification of the following key modular components i
 \subsection{Developmental Journey}
 Before delving into the final structure of the Sudoku solver, it is insightful to explore the initial prototyping phase. This phase laid the groundwork for the project and provided key insights that shaped the final design.
 
+<<<<<<< Updated upstream
+=======
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\textwidth]{figs/solver_flowchart.png}
+\caption{High-level flowchart of the Sudoku solver program, illustrating the initial conceptual design. Related pieces of logic are color-coded: orange for user interaction, yellow for format validation, cyan for board logic and pink for solver related logic.}
+
+
+\label{fig:solver_flowchart}
+\end{figure}
+
+>>>>>>> Stashed changes
 \subsubsection{Early Prototyping}
-In the initial stages, the envisioned usage of the program was conceptualised as a straightforward sequence of operations involving board validation, board representation, and solving. The logical flow was as follows:
+In the initial stages, the envisioned usage of the program was conceptualised as a straightforward sequence of operations involving board validation, board representation, solving and saving. The logical flow was as follows:
 
 \begin{enumerate}
 \item \textbf{Board Validation}: The user provides a file containing the Sudoku puzzle, which is then read, validated, and corrected if necessary. This process was handled by a utility function, \texttt{validate\_board}, located in the \texttt{utils} module. The function's purpose was to ensure the input adhered to Sudoku format standards and to correct any discrepancies. The code snippet for this step:
 \begin{verbatim}
 board_array = utils.validate_board(board_file)
 \end{verbatim}
-This function returns a 9x9 array representing the initial state of the Sudoku board.
+This function returns a 9x9 numpy array representing the initial state of the Sudoku board.
 
-\item \textbf{Board Representation}: The returned board array is then used to initialise an instance of the `\texttt{SudokuBoard}` class. This class encapsulates the board's representation and manipulation logic, providing common game board methods like `\texttt{reset}` and `\texttt{check\_valid}`. The initialisation step is shown below:
+\item \textbf{Board Representation}: The returned board array is then used to initialise an instance of the `\texttt{SudokuBoard}` class. This class encapsulates the board's representation and manipulation logic, offering standard board operations such as `\texttt{reset}` and `\texttt{check\_valid}`. The initialisation step is shown below:
 \begin{verbatim}
 sudoku_board = SudokuBoard(board_array)
 \end{verbatim}
 
-\item \textbf{Solving the Puzzle}: Finally, the `\texttt{SudokuBoard}` instance is passed to the `\texttt{solve}` method of a `\texttt{BacktrackingSolver}` class instance. The solver applies the backtracking algorithm to find a solution to the puzzle, returning a new `\texttt{SudokuBoard}` instance representing the solved board:
+\item \textbf{Solving the Puzzle}: The next step involved passing the \texttt{SudokuBoard} instance to the \texttt{solve} method of the solver class. This returned a new `\texttt{SudokuBoard}` instance representing the solved board:
 \begin{verbatim}
+<<<<<<< Updated upstream
 solver = BacktrackingSolver().solve(board)
+=======
+solved_board = Solver(board).solve()
+>>>>>>> Stashed changes
 \end{verbatim}
+The details of the specific solver used will be discussed in a later section.
 
+\item \textbf{Puzzle Saving}: The final step was to save the solution in the original format. This functionality is encapsulated in the board.save() method of the \texttt{SudokuBoard} class. 
+\begin{verbatim}
+solved_board.save(save_path)
+\end{verbatim}
 \end{enumerate}
 
+\subsubsection{Initial Hurdles and Insights}
 
+Benchmarking the initial prototype against a Kaggle dataset revealed several design and functionality challenges:
+
+<<<<<<< Updated upstream
 \subsubsection{Early Hurdles and Insights in Sudoku Solver Development}
 
 \paragraph{Key Challenges and Evolutions}
@@ -118,8 +144,21 @@ solver = BacktrackingSolver().solve(board)
     \item \textbf{Solver Extensibility:} The initial design did not easily accommodate different solver algorithms, especially those with unique initialisation needs. This led to an understanding of the necessity for a more flexible system for integrating new solvers.
 
     \item \textbf{Enhancing Input Flexibility in main.py:} Modifications were made to \texttt{main.py} to handle both single puzzle file paths and directories containing multiple puzzles. It also gained the capability for string input for quick puzzle testing and dynamic solver and format handler selection.
-\end{itemize}
+=======
+\begin{itemize}
+\item \textbf{Format Handling Limitation:} The primary obstacle was accommodating different input formats. Rather than resort to makeshift conversion scripts, it became clear that a sustainable approach was to develop a comprehensive format handling framework, ensuring native support for diverse input formats and streamlining the addition of new ones.
 
+\item \textbf{Validation Logic Overload:} The \texttt{validate\_board} function grew cumbersome as it handled more validation and correction logic, straying from the principles of single responsibility and modularity.
+
+\item \textbf{Misplaced Save Method:} In the context of supporting multiple formats, it was logical to transfer the \texttt{save} method from the \texttt{SudokuBoard} class to the format classes where the custom parsing methods would be defined as saving and parsing are two sides of the same coin and should live together.
+
+\item \textbf{Solver Framework Incompleteness:} The solver class lacked a clear framework which was capable of for incorporating alternative algorithms, hindering the dynamic selection and testing of various solving strategies on the same dataset.
+
+\item \textbf{Lack of Back-End Abstraction in Main:} The inflexibility of the \texttt{main.py} module became apparent, as integrating new format handlers or solvers necessitated direct modifications to the front end script, going against the principles of modularity and encapsulation.
+
+\item \textbf{Main Script Inflexibility:} The inability to process directories of board files limited batch testing capabilities. Moreover, the need to support string inputs for swift testing became apparent. 
+>>>>>>> Stashed changes
+\end{itemize}
 
 \subsubsection{High-Level Overview of the Final Implementation}
 The final design of the Sudoku solver program encapsulates a modular and flexible architecture, as outlined below:
@@ -139,13 +178,21 @@ solved_board = solver.solve(board, solver_backend)
 format_handler.save(solved_board, format_type, output_path)
 \end{verbatim}
 
+<<<<<<< Updated upstream
 In this design, \texttt{SudokuFormatHandler} and \texttt{SudokuSolver} act as wrapper classes that have methods which allow the user to specify which format and solver backend they want to use, respectively. These classes utilise standardised methods to process and solve the Sudoku puzzle, irrespective of the specific format or solving algorithm used. This approach significantly enhances the extensibility of the program, allowing for the easy integration of new formats and solving methods without requiring changes to the \texttt{main.py} script. Additionally, the flexibility to save the output in either the native format of the input or any other specified format is achieved by adjusting the \texttt{format\_type} argument, further increasing the program's versatility and user-friendliness. The next section will explore the design and implementation of the various modules in greater detail.
+=======
+In this design, \texttt{SudokuFormatHandler} and \texttt{SudokuSolver} act as wrapper classes. Their methods accept parameters which allow the user to specify the desired format and solver backend. The corresponding arguments for these parameters are collected by the \texttt{main.py} script. The next section will explore the design and implementation of the various modules in greater detail.
+>>>>>>> Stashed changes
 
 \section{Programme Modules}
 \subsection{Class SudokuFormatHandler}
 
 \subsubsection{Scope}
+<<<<<<< Updated upstream
 The scope of the FormatHandler classes implemented in \texttt{src/sudoku\_format\_handler.py} is defined by its role in bridging the gap between external representations of Sudoku boards and standardised internal representation. Specifically, the scope of this class encompasses:
+=======
+The scope of format handler classes, as implemented in \texttt{src/sudoku\_format\_handler.py}, is defined by their role in bridging the gap between external representations of Sudoku boards and their standardised internal representations. In this context, the scope of the \texttt{SudokuFormatHandler} class encompasses the following functionalities:
+>>>>>>> Stashed changes
 
 \begin{itemize}
 \item \textbf{Parsing}: Handling the conversion of the input, whether it comes as a string or as a file path, into a standardised \texttt{SudokuBoard} object.
@@ -230,9 +277,189 @@ The UMl class diagram in Figure \ref{fig:sudoku_board_uml} provides a visual rep
 \subsubsection{Extensibility and Limitations}
 The \texttt{SudokuBoard} class, unlike \texttt{SudokuFormatHandler}, isn't inherently extensible for different board types such as dictionary representations. To address this, an abstract \texttt{Board} base class could be introduced, defining methods for solvers and format handlers with standardised inputs and outputs. \texttt{SudokuBoard} would then extend this base, allowing for various concrete \texttt{Board} implementations to handle different representations.
 \subsection{SudokuSolver Class}
+<<<<<<< Updated upstream
+=======
+\subsubsection{Scope}
+The scope of the \texttt{SudokuSolver} class in \texttt{src/sudoku\_solver.py} is defined by the following:
+\begin{itemize}
+    \item \textbf{Solving}: Taking in a \texttt{SudokuBoard} object and returning a solved \texttt{SudokuBoard} object.
+    \item \textbf{Outputting Solve Status}: Returning the status of the solution, eg whether the board has no solution, ran into timeout, or was solved successfully.
+    \item \textbf{Algorithm Selection}: Providing a standardised interface for selecting the implemented solving algorithm.
+\end{itemize}
+\subsubsection{Design and implementation}
+\begin{itemize}
+    \item \textbf{Modularity}: The class leverages an abstract base class, \texttt{Solver}, which outlines the essential method for all solvers -- \texttt{solve}. This structure ensures consistency across different solvers while allowing for flexibility in their specific implementations.
+    \item \textbf{Extensibility}: New solvers can be easily integrated into the system by creating a subclass of \texttt{Solver}. After implementation, to use it just add it to \texttt{SudokuSolvers}'s \texttt{solver\_dict} class attribute and call the \texttt{set\_solver} method with the desired solver backend to select it.
+\end{itemize}
+
+The UML class diagrams in Figure \ref{fig:sudoku_solver_uml} provide a visual representation of the design and implementation of the \texttt{Solver} abstract base class and the \texttt{SudokuSolver} class along with the implemented \texttt{BacktrackingSolverBasic} and {BacktrackingSolverEasiestFirst} classes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{figs/UML_sudoku_solver.png}
+    \caption{UML class diagram for implementation of the SudokuSolver classes. Abstract classes are depicted in pink, concrete classes in blue. Composition relationships are indicated with arrows having a white diamond base and a solid head.}
+    \label{fig:sudoku_solver_uml}
+\end{figure}
+
+\paragraph{Backtracking-Based Sudoku Solvers:}
+
+The types of solver implemented in this coursework are based on the method of backtracking. Backtracking is a straightforward brute-force method that uses recursive depth-first search to explore all possible solutions, starting from the initial state of the Sudoku board. This method systematically tries every valid option for each empty cell and backtracks when it reaches a state where it can't make any valid moves.
+
+While this approach is comprehensive, it's not particularly efficient because it doesn't use heuristics—techniques to speed up the process by eliminating unlikely paths. Consequently, it can be very slow on certain boards which require very deep exploration to find a solution. 
+
+Here, two backtracking based solvers are implemented: \texttt{BacktrackingSolverBasic} and \texttt{BacktrackingSolverEasiestFirst}. The former is a basic implementation of the backtracking algorithm, while the latter uses a heuristic to prioritise cells with the fewest possible values, reducing the number of possibilities to explore. The \texttt{BacktrackingSolverEasiestFirst} solver is the default solver used by the \texttt{SudokuSolver} class.
+
+The performance of the solvers was evaluated using two distinct datasets: a set of 1 million Sudoku puzzles sourced from Kaggle \cite{kaggleDataset}, and a collection of 100 puzzles known to challenge backtracking algorithms which can be found in the repository at the path \texttt{benchmark\_board\_sets/hard\_100}. A timeout limit of 30seconds is set to avoid the solver getting stuck on a puzzle. The results are shown in Table 
+
+The backtracking with the easiest first heuristic is slightly slower than the basic backtracking solver on the easy puzzles, but significantly faster on the hard puzzles. 
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    Solve Time Metric & Basic & Easiest First \\
+    \hline
+    Median (ms) & 0.569 & 1.32 \\
+    \hline
+    Average (ms) & 0.773 & 1.35 \\
+    \hline
+    Max (ms) & 96.6 & 132 \\
+    \hline
+    Min (ms) & 1.47 & 1.12 \\
+    \hline
+    Std (ms) & 0.782 & 0.492 \\
+    \hline
+    \end{tabular}
+    \caption{Comparison of basic backtracking vs backtracking with easiest first heuristic performance metrics on the Kaggle million dataset.}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    Solve Time Metric & Basic & Easiest First \\
+    \hline
+    Median (s) & 1.100 & 0.083 \\
+    \hline
+    Average (s) & 9.726 & 0.706 \\
+    \hline
+    Max (s) & 120.000 & 12.028 \\
+    \hline
+    Min (ms) & 1.470 & 2.230 \\
+    \hline
+    Std (s) & 22.115 & 1.968 \\
+    \hline
+    \end{tabular}
+    \caption{Performance metrics comparison: basic backtracking vs easiest first heuristic on 100 puzzles optimised for backtracking challenge.}
+
+
+\end{figure}
+
+\subsubsection{Extensibility and Limitations}
+The Sudoku solver system is designed for easy extensibility. Developers can add new solvers by creating a class that extends \texttt{Solver} and implements the \texttt{solve} method with appropriate inputs and outputs. For backtracking solvers, extending \texttt{BacktrackingSolverBasic} and implementing \texttt{\_backtrack} suffices. New solvers are integrated into the system by adding them to the \texttt{solver\_dict} in the \texttt{SudokuSolver} class.
+
+However, the system currently operates on a single-threaded execution model, not utilizing parallel processing which could expedite solving by simultaneously exploring multiple solution tree branches. Additionally, while flexible within the backtracking approach, the framework might not easily support radically different solving methods.
+
+\subsection{UserIO}
+\subsubsection{Scope}
+The user IO is handled by the \texttt{src/main.py} script. This script is defined by its role as the entry point for the Sudoku solver program. The scope of this script encompasses:
+
+\begin{enumerate}
+    \item \textbf{Argument Parsing and Validation:} Interprets and validates command-line arguments for configuring the solver's operation.
+    \item \textbf{Initialisation:} Sets up core components like `\texttt{SudokuFormatHandler}` and `\texttt{SudokuSolver}` based on user inputs.
+    \item \textbf{Solving Process Management:} Manages the Sudoku solving flow, accommodating both single and batch operations.
+    \item \textbf{Statistics and Output Handling:} Gathers and presents solving statistics, handling outputs for solved puzzles.
+\end{enumerate}
+
+\subsubsection{Design and implementation}
+The `main.py` script in the Sudoku solver program is underpinned by the following design principles:
+
+\begin{itemize}
+    \item \textbf{Backend Independence:} Maintains independence from the solver and format handler backends.
+    \item \textbf{User Customisation:} Allows users to define input and output formats, enabling highly customised runs.
+    \item \textbf{Reproducibility:} Facilitates reproducible runs by saving statistics, including the Git commit hash and run arguments.
+    \item \textbf{Robust Error Handling:} Incorporates thorough argument validation and error handling to safeguard user interaction.
+    \item \textbf{Intuitive Defaults with Customization Options:} Provides sensible defaults for ease of use, alongside a range of customisable arguments for advanced users.
+    \item \textbf{Dynamic Solver and Formatter Integration:} Automatically enables selection of solvers and formatters added to the Sudoku solver and format handler.
+    \item \textbf{Clear Output and Feedback:} Ensures outputs are easily understandable and provides clear user feedback throughout the process.
+\end{itemize}
+
+The implementation of logic is shown as a flow chart in Figure \ref{fig:main_flowchart}.
+
+\subsubsection{Extensibility and Limitations}
+The main way in which \texttt{main.py} is currently designed to be extensible is in the integration of more complex solvers. At present, solvers can be initialised with a singular timeout parameter. However, in anticipation of future more complex solvers which require more initialisation parameters, a space for that logic has been left in the get\_solver\_args function. This function, which currently takes as input the users arguments, can easily be designed to handle the parsing of an input configuration file. This capability paves the way for the incorporation of advanced solvers without necessitating substantial modifications to the existing codebase. 
+The main limitation of main.py is that adding more output metrics like backtracking recursions, or other solver based statistics requires some plumbing work. Further, implementing parallel processing requires some code refactoring. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{figs/main_flowchart.png}
+    \caption{Flowchart of the main.py script.}
+    \label{fig:main_flowchart}
+\end{figure}
+
+
+\section{Profiling and optimisation}
+
+To reproduce the line profiling results mentioned below, follow these steps:
+
+\begin{verbatim}
+# For the initial results 
+git checkout 4c1278cf
+
+# For the final results
+# git checkout c3fad894
+
+# Activate the environment (replace 'env_name' with your environment name)
+source activate C1_VJ279
+
+# Add @profile to the check_valid method of the SudokuBoard class
+# Add @profile to the _backtrack method of the BacktrackingSolver class
+
+# Run the line profiler on the difficult sudoku board
+kernprof -l -v src/main.py test/challenging_boards/challenging_sudoku_0.txt
+ --format_type flat
+\end{verbatim}
+
+
+The line profiling of the initial Sudoku solver highlighted two critical functions: the \texttt{check\_valid} method of \texttt{SudokuBoard} and the \texttt{\_backtrack} method of \texttt{BacktrackingSolver}. \texttt{check\_valid}, taking 242.043 seconds, was identified as a major performance bottleneck due to its frequent invocation by \texttt{\_backtrack}, which itself took 514.918 seconds with 91.5\% of this time spent on \texttt{check\_valid}. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.8\textwidth}
+        \includegraphics[width=\textwidth]{figs/bt_line_profile_before.png}
+        \caption{\texttt{BacktrackingSolver.\_backtrack()} line profile results before optimisation}
+        \label{fig:backtrack_before}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.8\textwidth}
+        \includegraphics[width=\textwidth]{figs/check_valid_before.png}
+        \caption{\texttt{SudokuBoard.check\_valid()} line profile results before optimisation}
+        \label{fig:check_valid_before}
+    \end{subfigure}
+    \caption{Initial line profiling results before optimisation of \texttt{SudokuBoard.check\_valid}}
+    \label{fig:line_profiling_initial}
+\end{figure}
+
+After modifying the \texttt{check\_valid} method to use sets instead of lists, a noticeable improvement in performance was observed. The revised function now efficiently checks if a number is valid in a given cell using sets to keep track of the numbers in each row, column and subgrid of the board. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.8\textwidth}
+        \includegraphics[width=\textwidth]{figs/bt_line_profile_after.png}
+        \caption{\texttt{BacktrackingSolver.\_backtrack()} after optimisation}
+        \label{fig:backtrack_after}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.8\textwidth}
+        \includegraphics[width=\textwidth]{figs/check_valid_after.png}
+        \caption{SudokuBoard.\texttt{check\_valid()} after optimisation}
+        \label{fig:check_valid_after}
+    \end{subfigure}
+    \caption{Line profiling results after swapping from list based implemtation of \texttt{SudokuBoard.check\_valid} to a set based implementation}
+    \label{fig:line_profiling_after}
+\end{figure}
+The updated \texttt{check\_valid} function, showed a reduced total execution time of 34.9543 seconds. Additionally, the total time for the texttt{\_backtrack} function dropped to 198.044 seconds. While still significant, this represents an improvement over the previous implementation. Notably, now the proportion of \texttt{\_backtrack}'s time  spent on \texttt{check\_valid} dropped to 73.8\%, indicating a more balanced distribution of computational effort compared to the initial profiling.
+>>>>>>> Stashed changes
 
 \subsection{main.py}
 
+<<<<<<< Updated upstream
 \section {Testing and Optimisation}
 \subsection {Profiling}
 
@@ -284,5 +511,23 @@ Packaging and Usability
 % Uncomment the following two lines if you have references
 %\bibliographystyle{plain}
 %\bibliography{references}
+=======
+\section{Software Engineering Practices}
+
+\subsection{Exception Handling}
+The application includes a custom exceptions module \texttt{src/exceptions.py} for enhanced error management, with specific exceptions like \texttt{FormatError} and \texttt{TimeoutException} for targeted error scenarios.
+
+\subsection{Unit Testing and Continuous Integration}
+Each class has all of its methods tested through unit tests implemented using the pytest framework. Mocking is used where necessary in conjunction with testing on sample boards located in \texttt{test/\{module\_name\}\_test\_boards}. The tests are run automatically on every commit through pre-commit hooks in \texttt{.pre-commit-config.yaml}. The pre-commit hooks also fix file endings, remove trailing whitespaces, ensure consistent line endings. It also ensures the python scripts are properly formatted with Black and checks for PEP8 compliance with Flake8.
+
+\subsection{Packaging and Accessibility}
+Packaging involves using Conda for environment creation and management, ensuring consistent dependencies and versions, while Docker is employed for containerisation, facilitating seamless deployment and execution across various systems.
+
+\section{Conclusion}
+The report details the Sudoku solver's development, highlighting problem decomposition, solution design and implementation, underpinned by software engineering principles like modularisation, defensive programming, single responsibility, and encapsulation. These practices not only deliver an effective solver but also set a foundation for future enhancements and adaptability.
+
+\bibliographystyle{plain}
+\bibliography{mybibfile}
+>>>>>>> Stashed changes
 
 \end{document}

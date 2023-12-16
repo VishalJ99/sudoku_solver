@@ -1,7 +1,7 @@
 import argparse
 import os
 import time
-from sudoku_format_handler import SudokuFormatHandler
+from sudoku_format_handlers import SudokuFormatHandler
 from sudoku_solvers import SudokuSolver
 import json
 
