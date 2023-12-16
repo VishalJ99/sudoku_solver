@@ -183,26 +183,6 @@ class SudokuBoard:
         """
         return self._board[position]
 
-    def __setitem__(self, position: Tuple[int, int], value: int):
-        """
-        Sets the value of the board at the given position.
-
-        Parameters
-        ----------
-        position : Tuple[int, int]
-            A tuple representing the (row, column) position on the board.
-        value : int
-            The value to set at the specified position, which must be an integer between 0 and 9.
-
-        Raises
-        ------
-        ValueError
-            If the value is not an integer between 0 and 9.
-        """
-        if not isinstance(value, int) or not 0 <= value <= 9:
-            raise ValueError("Value must be an integer between 0 and 9")
-        self._board[position] = value
-
     def _validate_board_legality(self):
         """
         Validates if the Sudoku board follows the basic rules of Sudoku.
@@ -297,9 +277,11 @@ class SudokuBoard:
 
     def place_number(self, row: int, col: int, num: int):
         """
-        Places a number on the Sudoku board at the specified row and column.
-        Adds the number to the sets representing that row, column, and 3x3 subgrid.
-        Increments the filled_values counter attribute.
+        Places a number on the Sudoku board at the specified row and column,
+        ensuring that it adheres to the rules of Sudoku. The method updates
+        the board state by adding the number to the respective row, column,
+        and 3x3 subgrid sets. It also increments the filled_values counter
+        attribute.
 
         Parameters
         ----------
@@ -313,13 +295,31 @@ class SudokuBoard:
         Raises
         ------
         ValueError
-            If the specified position is invalid or the number is already in the current board.
+            If the number is not an integer in the range 1-9.
+        ValueError
+            If the specified position is invalid or placing the number at the
+            given position violates Sudoku rules.
+
+        Notes
+        -----
+        Checking the number everytime its placed on the board probably adds a bit of unecessary
+        overhead for the scope of the coursework, but in terms of SWE best practice, it embodies
+        the principle of defensive programming. It is a trade-off that makes this class more robust
+        to incorrect solver implementations.
         """
-        self._board[row][col] = num
-        self.rows[row].add(num)
-        self.columns[col].add(num)
-        self.subgrids[(row // 3) * 3 + (col // 3)].add(num)
-        self.filled_values += 1
+        # Ensure the number being placed is integer in the range 1-9.
+        if not isinstance(num, int) or num < 1 or num > 9:
+            raise ValueError("Number must be an integer in the range 1-9")
+
+        # Ensure the position is valid.
+        if self.check_valid(row, col, num):
+            self._board[row][col] = num
+            self.rows[row].add(num)
+            self.columns[col].add(num)
+            self.subgrids[(row // 3) * 3 + (col // 3)].add(num)
+            self.filled_values += 1
+        else:
+            raise ValueError("Number violates sudoku rules at the specified position")
 
     def remove_number(self, row: int, col: int, num: int):
         """

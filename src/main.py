@@ -9,9 +9,8 @@ import json
 def solve_sudoku(file_path, solver, format_handler, format_type, file_type, timeout):
     board = format_handler.parse(file_path, format_type, file_type)
     start_time = time.time()
-    solved_board = solver.solve(board)
+    solved_board, status = solver.solve(board)
     solve_time = time.time() - start_time
-    status = "Solved" if solved_board else "Timeout"
     return solved_board, solve_time, status
 
 
@@ -42,15 +41,14 @@ def validate_args(args):
 
         # Output path checks.
         # ------------------
-        if not args.output_path:
-            raise ValueError("Output path is required in batch mode")
-        elif os.path.exists(args.output_path) and not os.path.isdir(args.output_path):
-            raise ValueError("Output path must be a directory in batch mode")
-        elif os.path.exists(args.output_path) and os.listdir(args.output_path):
-            raise ValueError("Output directory must be empty in batch mode")
-        elif not os.path.exists(args.output_path):
-            print("[INFO] Output directory does not exist... Creating output directory")
-            os.makedirs(args.output_path)
+        if args.output_path:
+            if os.path.exists(args.output_path) and not os.path.isdir(args.output_path):
+                raise ValueError("Output path must be a directory in batch mode")
+            elif os.path.exists(args.output_path) and os.listdir(args.output_path):
+                raise ValueError("Output directory must be empty in batch mode")
+            elif not os.path.exists(args.output_path):
+                print("[INFO] Output directory does not exist... Creating output directory")
+                os.makedirs(args.output_path)
 
         # Conflicting argument checks.
         # ----------------------------
@@ -65,6 +63,9 @@ def validate_args(args):
         if args.input_type == "string" and os.path.isfile(args.sudoku_input):
             raise ValueError("input_type is set to string but sudoku_input describes a file path")
 
+        if not args.batch and os.path.isdir(args.sudoku_input):
+            raise ValueError("Please run with --batch to process a directory of Sudoku files")
+
         # output file checks.
         # -----------------
         if args.output_path and os.path.exists(args.output_path):
@@ -73,15 +74,15 @@ def validate_args(args):
     # Stats file checks.
     # -----------------
     if args.stats_path:
-        # Check file doesnt already exist.
         if os.path.exists(args.stats_path):
             raise ValueError("Stats file already exists, not overwriting...")
-        # Check file extension is valid txt or csv file.
         if not args.stats_path.endswith(".txt") and not args.stats_path.endswith(".csv"):
             raise ValueError("Stats file path must be a .txt or .csv file")
         # If batch mode enabled, check summary file name doesnt already exist.
         if os.path.exists(args.stats_path[:-4] + "_summary.txt") and args.batch:
             raise ValueError("Summary file already exists, not overwriting...")
+        if not os.path.exists(os.path.dirname(args.stats_path)):
+            raise ValueError("Stats file directory does not exist")
 
     # Solver parameter checks.
     # -----------------------
@@ -100,12 +101,12 @@ def get_solver_kwargs(args):
     return solver_kwargs
 
 
-def initialise_solver_and_format_handler(solver_kwargs):
+def initialise_solver_and_format_handler(solver_method, solver_kwargs):
     format_handler = SudokuFormatHandler()
     solver = SudokuSolver()
 
     # Set solver backend.
-    solver.set_solver("backtracking", solver_kwargs)
+    solver.set_solver(solver_method, solver_kwargs)
     return format_handler, solver
 
 
@@ -114,7 +115,7 @@ def main(args):
 
     solver_kwargs = get_solver_kwargs(args)
 
-    format_handler, solver = initialise_solver_and_format_handler(solver_kwargs)
+    format_handler, solver = initialise_solver_and_format_handler(args.solver, solver_kwargs)
 
     # Initialise list tracking solve time and status.
     solve_stats = []
@@ -125,8 +126,11 @@ def main(args):
 
     # Solve sudoku(s).
     if args.batch:
+        # Fetch all files in the directory, excluding hidden files.
+        sudoku_files = [file for file in os.listdir(args.sudoku_input) if not file.startswith(".")]
+
         # Loop through all files in the directory.
-        for file in os.listdir(args.sudoku_input):
+        for idx, file in enumerate(sudoku_files):
             file_path = os.path.join(args.sudoku_input, file)
 
             solved_board, solve_time, status = solve_sudoku(
@@ -137,20 +141,26 @@ def main(args):
                 args.input_type,
                 args.timeout,
             )
+            # print every len(sudoku_files) / 100 boards.
 
-            # Save solved board.
-            output_file = os.path.join(args.output_path, f"solved_{file}")
-            format_handler.save(
-                solved_board, args.input_format_type, output_file
-            ) if solved_board else None
+            print(f"\rSolved {idx}/{len(sudoku_files)} boards", end="")
+
+            if args.output_path:
+                # Save solved board.
+                output_file = os.path.join(args.output_path, f"solved_{file}")
+                format_handler.save(
+                    solved_board, args.output_format_type, output_file
+                ) if solved_board else None
 
             # Save run statistics.
             solve_stats.append((file, solve_time, status))
 
         # Calculate summary statistics.
         total_boards = len(solve_stats)
-        timeout_count = sum(1 for _, _, status in solve_stats if status == "Timeout")
-        solve_times = [time_taken for _, time_taken, status in solve_stats if status != "Timeout"]
+        timeout_count = sum(1 for _, _, status in solve_stats if "timeout" in status.lower())
+        solve_times = [
+            time_taken for _, time_taken, status in solve_stats if "timeout" not in status.lower()
+        ]
 
         # If all boards timed out, set all time related statistic values to 0.
         average_time = sum(solve_times) / len(solve_times) if solve_times else 0
@@ -206,21 +216,25 @@ def main(args):
                 json.dump(output_summary_dict, f, indent=4)
 
     else:
-        # Load board.
-        board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
-        print("Input:")
-        print(board)
-
-        # Solve board.
-        start_time = time.time()
-        solved_board = solver.solve(board)
-        solve_time = time.time() - start_time
-        status = "Solved" if board else "Timeout"
+        solved_board, solve_time, status = solve_sudoku(
+            args.sudoku_input,
+            solver,
+            format_handler,
+            args.input_format_type,
+            args.input_type,
+            args.timeout,
+        )
 
         # If board was solved and output path is set, save the solved board.
-        if args.output_path and board:
-            format_handler.save(board, args.out_format_type, args.output_path)
+        if args.output_path and solved_board:
+            format_handler.save(solved_board, args.out_format_type, args.output_path)
 
+        # TODO: improve this logic. Feels hacky.
+        # In single mode explictly load board from file for printing to console.
+        board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
+
+        print("\nInput Board:")
+        print(board)
         print("\nSolution:")
         print(solved_board)
 
@@ -310,7 +324,7 @@ if __name__ == "__main__":
         "--solver",
         type=str,
         choices=supported_solvers,
-        default="backtracking",
+        default="bt_basic",
         help="Solver to use for solving the Sudoku board. Defaults to 'backtracking'.",
     )
 
