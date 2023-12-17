@@ -24,7 +24,7 @@ docker build -t c1_vj279 .
 
 ## Usage
 ```
-docker run -v $(pwd):/C1_VJ279 c1_vj279 python main.py <sudoku_input.txt> [options]
+docker run -v $(pwd):/C1_VJ279 c1_vj279 python src/main.py <sudoku_input.txt> [options]
 ```
 
 ### Command Line Arguments
