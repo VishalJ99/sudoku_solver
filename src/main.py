@@ -114,7 +114,12 @@ def validate_args(args: argparse.Namespace) -> argparse.Namespace:
         # If batch mode enabled, check summary file name doesnt already exist.
         if os.path.exists(args.stats_path[:-4] + "_summary.txt") and args.batch:
             raise ValueError("Summary file already exists, not overwriting...")
-        if not os.path.exists(os.path.dirname(args.stats_path)):
+        # Check stats file directory exists. However, if a directory is not specified in
+        # stats_path (i.e., it's a filename only), os.path.dirname returns an empty string
+        # so need another check using os.path.exists which will return True for empty string.
+        if os.path.dirname(args.stats_path) and not os.path.exists(
+            os.path.dirname(args.stats_path)
+        ):
             raise ValueError("Stats file directory does not exist")
 
     # Solver parameter checks.
@@ -136,10 +141,6 @@ def main(args):
 
     # Initialise list tracking solve time and status.
     solve_stats = []
-
-    # If saving statistics, fetch git commit hash and save to environment variable.
-    if args.stats_path:
-        os.environ["GIT_COMMIT_HASH"] = os.popen("git rev-parse HEAD").read().strip()
 
     # Solve sudoku(s).
     if args.batch:
@@ -164,7 +165,7 @@ def main(args):
 
             # print every len(sudoku_files) / 100 boards.
 
-            print(f"\rSolved {idx}/{len(sudoku_files)} boards", end="")
+            print(f"\rSolved {idx+1}/{len(sudoku_files)} boards", end="")
 
             if args.output_path:
                 # Save solved board.
@@ -209,22 +210,25 @@ def main(args):
         print("-------------------")
         print(summary_stats)
 
-        # Put summary and other important run information into a dictionary.
-        output_summary_dict = {
-            "git_commit_hash": os.environ["GIT_COMMIT_HASH"],
-            "args": json.dumps(vars(args)),
-            "total_boards": total_boards,
-            "timeout_count": timeout_count,
-            "percentage_timeouts": timeout_count / total_boards * 100,
-            "average_solve_time": average_time,
-            "median_solve_time": median_time,
-            "min_solve_time": min_time,
-            "max_solve_time": max_time,
-            "std_deviation_solve_time": std_deviation,
-        }
-
         # Save time statistics of each board to save_stats file.
         if args.stats_path:
+            # fetch git commit hash and save to environment variable.
+            git_commit_hash = os.popen("git rev-parse HEAD").read().strip()
+
+            # Put summary and other important run information into a dictionary.
+            output_summary_dict = {
+                "git_commit_hash": git_commit_hash,
+                "args": json.dumps(vars(args)),
+                "total_boards": total_boards,
+                "timeout_count": timeout_count,
+                "percentage_timeouts": timeout_count / total_boards * 100,
+                "average_solve_time": average_time,
+                "median_solve_time": median_time,
+                "min_solve_time": min_time,
+                "max_solve_time": max_time,
+                "std_deviation_solve_time": std_deviation,
+            }
+
             with open(args.stats_path, "w") as f:
                 f.write(
                     "Board,Time (s),Status\n"
