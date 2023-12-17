@@ -1,0 +1,12 @@
+{
+    "git_commit_hash": "21271b33f8cd912e507d92691ae5fe03f0e559fc",
+    "args": "{\"sudoku_input\": \"benchmark_board_sets/hard_100\", \"batch\": true, \"input_type\": \"filepath\", \"input_format_type\": \"flat\", \"output_path\": null, \"output_format_type\": \"grid\", \"stats_path\": \"solver_output/hard_100_easiest_first_bt.txt\", \"timeout\": 120, \"solver\": \"bt_easiest_first\"}",
+    "total_boards": 100,
+    "timeout_count": 0,
+    "percentage_timeouts": 0.0,
+    "average_solve_time": 0.6743938374519348,
+    "median_solve_time": 0.08149099349975586,
+    "min_solve_time": 0.002174854278564453,
+    "max_solve_time": 11.408036231994629,
+    "std_deviation_solve_time": 1.8655809207762775
+}

@@ -28,27 +28,28 @@ class SudokuBoard:
 
     Methods
     -------
-    __init__(sudoku_board, verbose=False)
+    __init__(sudoku_board: SudokuBoard, verbose=False)
         Initialises the SudokuBoard with a given board state.
+    _initialise_sets()
+        Initialises the a list of sets for the numbers present in each row, column,
+        and 3x3 subgrid of the board.
     reset()
         Resets the Sudoku board to its original state.
     __str__()
         Returns a formatted string representation of the Sudoku board.
-    __getitem__(position)
+    __getitem__(position: Tuple[int, int])
         Returns the value at the specified position on the Sudoku board.
-    __setitem__(position, value)
-        Sets the value at the specified position on the Sudoku board.
-    _validate_board_legality()
+    _validate_board_legality() -> bool
         Validates if the Sudoku board follows the basic rules of Sudoku.
-    check_valid(row, col, num)
+    check_valid(row: int, col: int, num: int) -> bool
         Checks if a number can be legally placed in the specified row and column.
-    place_number(row, col, num)
+    place_number(row: int, col: int, num: int)
         Places a number on the Sudoku board at the specified row and column.
-    remove_number(row, col, num)
+    remove_number(row: int, col: int)
         Removes a number from the Sudoku board at the specified row and column.
-    get_related_cell_values(row, col)
-        Finds values in cells that are related to the given cell.
-    get_empty_cells()
+    find_possible_cell_values(row: int, col: int) -> Set[int]
+        Determines the possible values that can be placed in a specific cell of the Sudoku board.
+    get_empty_cells() -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]
         Finds the next empty square in the board.
     """
 
@@ -321,7 +322,7 @@ class SudokuBoard:
         else:
             raise ValueError("Number violates sudoku rules at the specified position")
 
-    def remove_number(self, row: int, col: int, num: int):
+    def remove_number(self, row: int, col: int):
         """
         Removes a number from the Sudoku board at the specified row and column.
         Removes the number to the sets representing that row, column, and 3x3 subgrid.
@@ -333,15 +334,13 @@ class SudokuBoard:
             The row index from which the number is to be removed (0-based).
         col : int
             The column index from which the number is to be removed (0-based).
-        num : int
-            The number to be removed from the board.
 
         Raises
         ------
         ValueError
             If the specified position is invalid or the number is not in the current board state.
         """
-
+        num = self._board[row][col]
         self._board[row][col] = 0
         self.rows[row].remove(num)
         self.columns[col].remove(num)
@@ -380,7 +379,7 @@ class SudokuBoard:
         potential_values = self._all_possible_values - existing_values
         return potential_values
 
-    def get_empty_cells(self) -> Optional[Tuple[List[int], List[int]]]:
+    def get_empty_cells(self) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
         """
         Finds the indices for the empty squares in the board
         order they are returned in is from left to right, top to bottom.

@@ -1,8 +1,20 @@
 class FormatError(Exception):
-    """Exception raised for errors in the input format.
+    """
+    Exception for errors in input format.
 
-    Attributes:
-        message -- explanation of the error
+    This exception is raised when an input does not match the expected format,
+    used primarily in the context of the error handling in the parse method of
+    FormatHandler classes.
+
+    Parameters
+    ----------
+    message : str, optional
+        A human-readable message indicating the error. Default is "Input format is incorrect".
+
+    Attributes
+    ----------
+    message : str
+        Human-readable message indicating the error.
     """
 
     def __init__(self, message="Input format is incorrect"):
@@ -11,10 +23,21 @@ class FormatError(Exception):
 
 
 class TimeoutException(Exception):
-    """Exception used to signal a timeout in the solver.
+    """
+    Exception for signaling a timeout in a solver.
 
-    Attributes:
-        message -- explanation of the error
+    Used primarily in the context of error handling in the Solver classes to
+    indicate that a specified timeout has been reached during execution.
+
+    Parameters
+    ----------
+    message : str, optional
+        A human-readable message indicating the timeout. Default is "Solver reached timeout".
+
+    Attributes
+    ----------
+    message : str
+        Human-readable message indicating the timeout.
     """
 
     def __init__(self, message="Solver reached timeout"):

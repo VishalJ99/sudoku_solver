@@ -1,4 +1,4 @@
-from sudoku_format_handler import SudokuFormatHandler
+from sudoku_format_handlers import SudokuFormatHandler
 import pytest
 import numpy as np
 
@@ -43,9 +43,9 @@ def test_board_representation():
     assert np.array_equal(board._board, expected_answer)
 
 
-def test_place_remove_number_and_getter():
+def test_board_manipulation():
     # Check that the board can be indexed like a numpy array.
-    # Check the error handling for invalid values.
+    # Check the board manipulation logic works as expected.
     INPUT = "test/sudoku_parser_test_boards/good_input.txt"
 
     format_handler = SudokuFormatHandler()
@@ -59,17 +59,34 @@ def test_place_remove_number_and_getter():
         # Invalid move.
         board.place_number(0, 0, 1)
 
+    original_number_filled = board.filled_values
+
     # Test that the board can be set to a valid value.
     board.place_number(0, 0, 2)
 
     # Test the board can be indexed like a numpy array.
     assert board[0, 0] == 2
 
+    # Test that the attributes are properly updated.
+    assert board.rows[0] == set([2, 7])
+    assert board.columns[0] == set([1, 2, 4, 7])
+    assert board.subgrids[0] == set([2])
+    assert board.filled_values == original_number_filled + 1
+
+    # Test that numbers can be removed from the board.
+    board.remove_number(0, 0)
+    assert board[0, 0] == 0
+
+    # Test that the attributes are properly updated.
+    assert board.rows[0] == set([7])
+    assert board.columns[0] == set([1, 4, 7])
+    assert board.subgrids[0] == set([])
+    assert board.filled_values == original_number_filled
+
 
 def test_print_formatting():
     # Check that SudokuBoards string representation
     # allows the the board state to be shown in a nice format.
-
     INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
 
@@ -122,9 +139,9 @@ def test_check_valid_method():
 def test_get_related_method():
     # Check that the board can find the options available to a cell
     # given values filled in related cells.
-    INPUT = "test/sudoku_solver_test_boards/hard.txt"
+    INPUT = "test/sudoku_solver_test_boards/easy_1.txt"
     format_handler = SudokuFormatHandler()
     board = format_handler.parse(INPUT, format="grid")
-    vals = board.find_possible_cell_values(0, 0)
-    expected_vals = set([2, 3, 4, 6, 7, 8, 9])
+    vals = board.find_possible_cell_values(0, 2)
+    expected_vals = set([3, 8])
     assert vals == expected_vals

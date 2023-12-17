@@ -4,8 +4,16 @@
 # .pyc files
 *.pyc
 
-# sphinx documentation
-docs/_*
+# Sphinx documentation
+docs/*
+!docs/conf.py
+!docs/*.rst
+!docs/_static/
+!docs/_templates/
+!docs/Makefile
+!docs/make.bat
+!docs/requirements.txt
+
 
 # sandbox
 sandbox.ipynb

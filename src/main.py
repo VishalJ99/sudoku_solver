@@ -1,22 +1,58 @@
 import argparse
 import os
-import time
-from sudoku_format_handler import SudokuFormatHandler
-from sudoku_solvers import SudokuSolver
 import json
+from sudoku_format_handlers import SudokuFormatHandler
+from sudoku_solvers import SudokuSolver
+from utils import (
+    solve_sudoku,
+    get_solver_kwargs,
+    initialise_solver_and_format_handler,
+    load_boards,
+)
+import sys
+
+# TODO: Sort input for batch so files are processed in order.
 
 
-def solve_sudoku(file_path, solver, format_handler, format_type, file_type, timeout):
-    board = format_handler.parse(file_path, format_type, file_type)
-    start_time = time.time()
-    solved_board, status = solver.solve(board)
-    solve_time = time.time() - start_time
-    return solved_board, solve_time, status
-
-
-def validate_args(args):
+def validate_args(args: argparse.Namespace) -> argparse.Namespace:
     """
-    validates the arguments passed to the program
+    Validate the arguments passed to the program.
+
+    This function performs a series of checks on the command-line arguments provided
+    to the program. It ensures the correctness and consistency of file paths, modes,
+    and solver parameters. In batch mode, additional checks are performed for input
+    and output directories. It raises appropriate exceptions for any invalid or
+    conflicting arguments.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The command-line arguments passed to the program.
+
+    Returns
+    -------
+    argparse.Namespace
+        The validated command-line arguments.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the input file or directory does not exist when required.
+    ValueError
+        If any argument value is invalid or inconsistent with other argument values.
+
+    Notes
+    -----
+    The function adjusts the timeout argument to a default value if an invalid value is provided.
+    It also prints informational messages for certain conditions, such as the creation of an
+    output directory or setting default values for certain arguments.
+
+    Examples
+    --------
+    >>> args = argparse.Namespace(sudoku_input='puzzle.txt', input_type='filepath', batch=False)
+    >>> validated_args = validate_args(args)
+    >>> print(validated_args)
+    Namespace(sudoku_input='puzzle.txt', input_type='filepath', batch=False)
     """
     # Input file checks.
     # -----------------
@@ -81,7 +117,12 @@ def validate_args(args):
         # If batch mode enabled, check summary file name doesnt already exist.
         if os.path.exists(args.stats_path[:-4] + "_summary.txt") and args.batch:
             raise ValueError("Summary file already exists, not overwriting...")
-        if not os.path.exists(os.path.dirname(args.stats_path)):
+        # Check stats file directory exists. However, if a directory is not specified in
+        # stats_path (i.e., it's a filename only), os.path.dirname returns an empty string
+        # so need another check using os.path.exists which will return True for empty string.
+        if os.path.dirname(args.stats_path) and not os.path.exists(
+            os.path.dirname(args.stats_path)
+        ):
             raise ValueError("Stats file directory does not exist")
 
     # Solver parameter checks.
@@ -94,66 +135,38 @@ def validate_args(args):
     return args
 
 
-def get_solver_kwargs(args):
-    # In the future, args will contain a path to a config file which will be parsed here to get
-    # the solver kwargs.
-    solver_kwargs = {"timeout": args.timeout}
-    return solver_kwargs
-
-
-def initialise_solver_and_format_handler(solver_method, solver_kwargs):
-    format_handler = SudokuFormatHandler()
-    solver = SudokuSolver()
-
-    # Set solver backend.
-    solver.set_solver(solver_method, solver_kwargs)
-    return format_handler, solver
-
-
 def main(args):
-    args = validate_args(args)
-
-    solver_kwargs = get_solver_kwargs(args)
-
-    format_handler, solver = initialise_solver_and_format_handler(args.solver, solver_kwargs)
+    try:
+        args = validate_args(args)
+        solver_kwargs = get_solver_kwargs(args)
+        format_handler, solver = initialise_solver_and_format_handler(args.solver, solver_kwargs)
+    except Exception as e:
+        print(f"[ERROR] {e}")
+        sys.exit(1)
 
     # Initialise list tracking solve time and status.
     solve_stats = []
 
-    # If saving statistics, fetch git commit hash and save to environment variable.
-    if args.stats_path:
-        os.environ["GIT_COMMIT_HASH"] = os.popen("git rev-parse HEAD").read().strip()
-
     # Solve sudoku(s).
     if args.batch:
-        # Fetch all files in the directory, excluding hidden files.
-        sudoku_files = [file for file in os.listdir(args.sudoku_input) if not file.startswith(".")]
+        # Fetch boards from directory.
+        sudoku_boards_fpaths_tuple = load_boards(args.sudoku_input, args.input_format_type)
 
         # Loop through all files in the directory.
-        for idx, file in enumerate(sudoku_files):
-            file_path = os.path.join(args.sudoku_input, file)
+        for idx, (file_path, board) in enumerate(sudoku_boards_fpaths_tuple):
+            solved_board, solve_time, status = solve_sudoku(board, solver)
 
-            solved_board, solve_time, status = solve_sudoku(
-                file_path,
-                solver,
-                format_handler,
-                args.input_format_type,
-                args.input_type,
-                args.timeout,
-            )
-            # print every len(sudoku_files) / 100 boards.
-
-            print(f"\rSolved {idx}/{len(sudoku_files)} boards", end="")
+            print(f"\rSolved {idx+1}/{len(sudoku_boards_fpaths_tuple)} boards", end="")
 
             if args.output_path:
                 # Save solved board.
-                output_file = os.path.join(args.output_path, f"solved_{file}")
+                output_file = os.path.join(args.output_path, f"solved_{file_path}")
                 format_handler.save(
                     solved_board, args.output_format_type, output_file
                 ) if solved_board else None
 
             # Save run statistics.
-            solve_stats.append((file, solve_time, status))
+            solve_stats.append((file_path, solve_time, status))
 
         # Calculate summary statistics.
         total_boards = len(solve_stats)
@@ -188,22 +201,25 @@ def main(args):
         print("-------------------")
         print(summary_stats)
 
-        # Put summary and other important run information into a dictionary.
-        output_summary_dict = {
-            "git_commit_hash": os.environ["GIT_COMMIT_HASH"],
-            "args": json.dumps(vars(args)),
-            "total_boards": total_boards,
-            "timeout_count": timeout_count,
-            "percentage_timeouts": timeout_count / total_boards * 100,
-            "average_solve_time": average_time,
-            "median_solve_time": median_time,
-            "min_solve_time": min_time,
-            "max_solve_time": max_time,
-            "std_deviation_solve_time": std_deviation,
-        }
-
         # Save time statistics of each board to save_stats file.
         if args.stats_path:
+            # fetch git commit hash and save to environment variable.
+            git_commit_hash = os.popen("git rev-parse HEAD").read().strip()
+
+            # Put summary and other important run information into a dictionary.
+            output_summary_dict = {
+                "git_commit_hash": git_commit_hash,
+                "args": json.dumps(vars(args)),
+                "total_boards": total_boards,
+                "timeout_count": timeout_count,
+                "percentage_timeouts": timeout_count / total_boards * 100,
+                "average_solve_time": average_time,
+                "median_solve_time": median_time,
+                "min_solve_time": min_time,
+                "max_solve_time": max_time,
+                "std_deviation_solve_time": std_deviation,
+            }
+
             with open(args.stats_path, "w") as f:
                 f.write(
                     "Board,Time (s),Status\n"
@@ -216,14 +232,11 @@ def main(args):
                 json.dump(output_summary_dict, f, indent=4)
 
     else:
-        solved_board, solve_time, status = solve_sudoku(
-            args.sudoku_input,
-            solver,
-            format_handler,
-            args.input_format_type,
-            args.input_type,
-            args.timeout,
+        sudoku_board_fpath_tuple = load_boards(
+            args.sudoku_input, args.input_format_type, args.input_type
         )
+        board, path = sudoku_board_fpath_tuple[0]
+        solved_board, solve_time, status = solve_sudoku(board, solver)
 
         # If board was solved and output path is set, save the solved board.
         if args.output_path and solved_board:
