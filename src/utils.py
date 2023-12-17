@@ -145,7 +145,10 @@ def initialise_solver_and_format_handler(
 
 
 def load_boards(
-    board_path: str, format_handler: SudokuFormatHandler, format: str = "grid"
+    board_path: str,
+    format_handler: SudokuFormatHandler,
+    format: str = "grid",
+    input_type: str = "filepath",
 ) -> Tuple[str, ...]:
     """
     Load a set of Sudoku boards from an input directory or file.
@@ -159,6 +162,8 @@ def load_boards(
     format : str, optional
         The format in which the Sudoku boards are presented (e.g., 'grid', 'line').
         Default is 'grid'.
+    input_type : str, optional
+        The type of input (e.g., 'filepath', 'string'). Default is 'filepath'.
 
     Returns
     -------
@@ -184,7 +189,7 @@ def load_boards(
     >>> print(boards)
     """
 
-    if not os.path.exists(board_path):
+    if input_type == "filepath" and not os.path.exists(board_path):
         raise FileNotFoundError(f"File or directory {board_path} does not exist.")
 
     board_paths = [board_path]
@@ -201,7 +206,7 @@ def load_boards(
 
     for path in board_paths:
         try:
-            board = format_handler.parse(path, format)
+            board = format_handler.parse(path, format, input_type)
             sudoku_boards.append(board)
         except Exception as e:
             exceptions.append((path, e))

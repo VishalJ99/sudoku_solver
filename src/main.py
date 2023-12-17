@@ -232,7 +232,9 @@ def main(args):
                 json.dump(output_summary_dict, f, indent=4)
 
     else:
-        sudoku_board_fpath_tuple = load_boards(args.sudoku_input, args.input_format_type)
+        sudoku_board_fpath_tuple = load_boards(
+            args.sudoku_input, args.input_format_type, args.input_type
+        )
         board, path = sudoku_board_fpath_tuple[0]
         solved_board, solve_time, status = solve_sudoku(board, solver)
 
