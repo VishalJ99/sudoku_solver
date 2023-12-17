@@ -1,22 +1,55 @@
 import argparse
 import os
-import time
+import json
 from sudoku_format_handlers import SudokuFormatHandler
 from sudoku_solvers import SudokuSolver
-import json
+from utils import (
+    solve_sudoku,
+    get_solver_kwargs,
+    initialise_solver_and_format_handler,
+)
+from exceptions import FormatError
 
 
-def solve_sudoku(file_path, solver, format_handler, format_type, file_type, timeout):
-    board = format_handler.parse(file_path, format_type, file_type)
-    start_time = time.time()
-    solved_board, status = solver.solve(board)
-    solve_time = time.time() - start_time
-    return solved_board, solve_time, status
-
-
-def validate_args(args):
+def validate_args(args: argparse.Namespace) -> argparse.Namespace:
     """
-    validates the arguments passed to the program
+    Validate the arguments passed to the program.
+
+    This function performs a series of checks on the command-line arguments provided
+    to the program. It ensures the correctness and consistency of file paths, modes,
+    and solver parameters. In batch mode, additional checks are performed for input
+    and output directories. It raises appropriate exceptions for any invalid or
+    conflicting arguments.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The command-line arguments passed to the program.
+
+    Returns
+    -------
+    argparse.Namespace
+        The validated command-line arguments.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the input file or directory does not exist when required.
+    ValueError
+        If any argument value is invalid or inconsistent with other argument values.
+
+    Notes
+    -----
+    The function adjusts the timeout argument to a default value if an invalid value is provided.
+    It also prints informational messages for certain conditions, such as the creation of an
+    output directory or setting default values for certain arguments.
+
+    Examples
+    --------
+    >>> args = argparse.Namespace(sudoku_input='puzzle.txt', input_type='filepath', batch=False)
+    >>> validated_args = validate_args(args)
+    >>> print(validated_args)
+    Namespace(sudoku_input='puzzle.txt', input_type='filepath', batch=False)
     """
     # Input file checks.
     # -----------------
@@ -94,22 +127,6 @@ def validate_args(args):
     return args
 
 
-def get_solver_kwargs(args):
-    # In the future, args will contain a path to a config file which will be parsed here to get
-    # the solver kwargs.
-    solver_kwargs = {"timeout": args.timeout}
-    return solver_kwargs
-
-
-def initialise_solver_and_format_handler(solver_method, solver_kwargs):
-    format_handler = SudokuFormatHandler()
-    solver = SudokuSolver()
-
-    # Set solver backend.
-    solver.set_solver(solver_method, solver_kwargs)
-    return format_handler, solver
-
-
 def main(args):
     args = validate_args(args)
 
@@ -132,15 +149,19 @@ def main(args):
         # Loop through all files in the directory.
         for idx, file in enumerate(sudoku_files):
             file_path = os.path.join(args.sudoku_input, file)
+            try:
+                solved_board, solve_time, status = solve_sudoku(
+                    file_path,
+                    solver,
+                    format_handler,
+                    args.input_format_type,
+                    args.input_type,
+                )
+            # If the file is not a valid sudoku board, skip it.
+            except FormatError as e:
+                print(f"[ERROR] {file_path} not valid sudoku - {e}")
+                continue
 
-            solved_board, solve_time, status = solve_sudoku(
-                file_path,
-                solver,
-                format_handler,
-                args.input_format_type,
-                args.input_type,
-                args.timeout,
-            )
             # print every len(sudoku_files) / 100 boards.
 
             print(f"\rSolved {idx}/{len(sudoku_files)} boards", end="")
@@ -222,7 +243,6 @@ def main(args):
             format_handler,
             args.input_format_type,
             args.input_type,
-            args.timeout,
         )
 
         # If board was solved and output path is set, save the solved board.
