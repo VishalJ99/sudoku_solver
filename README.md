@@ -1,4 +1,3 @@
-
 # Sudoku Solver CLI
 
 ## Introduction
@@ -9,7 +8,7 @@ This repository contains a command-line interface (CLI) tool for solving Sudoku 
 
 - **Single and Batch Processing**: Solve individual puzzles or process multiple files in a directory.
 - **Support for Various Formats**: Accepts inputs as file paths or direct Sudoku board strings.
-- **Flexible Output Options**: Customize output paths and formats for the solved Sudoku boards.
+- **Flexible Output Options**: Customise output paths and formats for the solved Sudoku boards.
 - **Statistics Generation**: Option to generate and save statistics about the solving process.
 - **Extensible**: Easily extendable to incorporate new input formats and Sudoku solving algorithms.
 
