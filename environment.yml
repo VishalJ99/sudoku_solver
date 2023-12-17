@@ -1,0 +1,16 @@
+name: C1_VJ279
+channels:
+  - defaults
+dependencies:
+  - python=3.11.5
+  - black=23.11.0
+  - pre-commit=3.4.0
+  - black=23.11.0
+  - flake8=4.0.1
+  - pytest=6.2.5
+  - sphinx=5.0.2
+  - sphinx_rtd_theme=1.1.1
+  - numpy=1.26.2
+  - numpy-base=1.26.2
+  - pip:
+      - line-profiler==4.1.2
