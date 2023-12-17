@@ -227,11 +227,11 @@ def load_boards(
                 print(f"[ERROR] Multiple errors occurred. See {error_file} for details.")
             else:
                 for path, e in exceptions:
-                    print(f"[ERROR] {path}: {e}")
+                    print(f"[ERROR] Following raised for {path}:\n{e}")
             sys.exit(1)
         else:
             for path, e in exceptions:
-                print(f"[WARNING] Error in {path}: {e}")
+                print(f"[WARNING] Error in {path}:\n{e}")
 
     # Zip together the boards and their paths
     # i.e each element in the return tuple is (path, SudokuBoard).
