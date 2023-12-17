@@ -14,7 +14,7 @@ class FormatHandler(ABC):
     An abstract base class for handling different formats of Sudoku boards.
 
     A FormatHandler is responsible for parsing and saving Sudoku boards from a specific
-    format. It must implement the parse and save methods.
+    format. It must implement the parse and save methods w
 
     Common preprocessing steps are implemented in this class and are expected to be called
     by subclasses in their parse method. These steps are expected to be common to all formats.
@@ -134,9 +134,10 @@ class FormatHandler(ABC):
         --------
         >>> self._load_data("path/to/board.txt", "filepath")
         ["530070000", "600195000", ...]  # Example output for a file
-        >>> self._load_data("530070000\n600195000", "string")
-        ["530070000", "600195000"]  # Example output for a string
+        >>> self._load_data("530070000600195000...", "string")
+        ["530070000", "600195000", ...]  # Example output for a file
         """
+
         if input_type == "filepath":
             if not os.path.exists(board_input):
                 raise FileNotFoundError(f"File not found: {board_input}")
