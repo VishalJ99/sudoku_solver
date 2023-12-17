@@ -1,3 +1,4 @@
+
 # Sudoku Solver CLI
 
 ## Introduction
@@ -16,11 +17,62 @@ This repository contains a command-line interface (CLI) tool for solving Sudoku 
 
 To install this Sudoku Solver, clone this repository and navigate to the cloned directory and build the docker image.
 
-```bash
+```
 git clone git@gitlab.developers.cam.ac.uk:phy/data-intensive-science-mphil/c1_assessment/vj279.git
 cd vj279
 docker build -t c1_vj279 .
 ```
+
+## Expected Input Format
+This programme can accept text files for sudoku board inputs in two formats: grid and flat.
+
+### Grid Format
+The grid format is the standard format specified for the coursework.
+A sudoku board specified with a 9x9 grid of numbers with zero representing unknown values and `|`,`+`,`-` separating cells and , i.e.:
+```
+$ cat grid_input.txt
+000|007|000
+000|009|504
+000|050|169
+---+---+---
+080|000|305
+075|000|290
+406|000|080
+---+---+---
+762|080|000
+103|900|000
+000|600|000
+```
+This programme also accepts variants of this grid format that do not require digit alterations. A variant is defined as a grid format which has, after removing white space, empty lines and replacing any dots with zeros, exactly 11 rows. With rows 1-3, 5-7 and 9-11 containing triplets of digits seperated by any non numeric character. It must also have no digits rows 4 and 8 for those
+rows to be considered a valid seperator. For example, the following is also an acceptable grid format
+
+```
+$ cat correctable_grid_input.txt
+,000,007,000,
+000,00 9,504
+000,050,16 9
+--!@#$%^&*(((------
+0 80,000,305
+075,000,2 90
+406,000,08 0
+---*&^%$$$$$$$$%^&------
+762, 080,000
+1 03P9 00P000
+000Q6 00,00 0
+```
+
+### Flat Format
+
+The flat format is a single line of 81 digits with zeros or .'s representing unknown values. The digits are read from left to right and top to bottom. For example, the following is a valid flat format
+
+```
+$ cat flat_input.txt
+004300209005009001070060043006002087190007400050083000600000105003508690042910300
+```
+
+No corrections are made for invalid flat formats. If the input is not a valid flat format, the programme will throw an error.
+
+
 
 ## Usage
 ```
