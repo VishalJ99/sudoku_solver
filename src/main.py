@@ -237,9 +237,9 @@ def main(args):
 
     else:
         sudoku_board_fpath_tuple = load_boards(
-            args.sudoku_input, args.input_format_type, args.input_type
+            args.sudoku_input, format_handler, args.input_format_type, args.input_type
         )
-        board, path = sudoku_board_fpath_tuple[0]
+        path, board = sudoku_board_fpath_tuple[0]
         solved_board, solve_time, status = solve_sudoku(board, solver)
 
         # If board was solved and output path is set, save the solved board.
