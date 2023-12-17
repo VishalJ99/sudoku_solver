@@ -387,20 +387,19 @@ These results can be found in the \texttt{solver\_output} directory in the repos
 \section{Software Engineering Practices}
 
 \subsection{Exception Handling}
-The application includes a custom exceptions module \texttt{src/exceptions.py} for enhanced error management, with specific exceptions like \texttt{FormatError} and \texttt{TimeoutException} for targeted error scenarios.
+The application includes \texttt{src/exceptions.py}, featuring specific exceptions like \texttt{FormatError} and \texttt{TimeoutException} for targeted error scenarios. \texttt{main.py} script handles common user errors using try-except blocks.
 
-\subsection{Version control}
-In developing the Sudoku solver, Git played a crucial role in version control. Branches were systematically named using feature/ and refactor/ conventions to enhance readability and understanding for those reviewing the Git history, while also ensuring the stability of the main branch. A release branch was used when generating the runs for the tables in figures \ref{fig:kaggle-million} and \ref{fig:hard-100} to ensure reproducibility. Commit messages focused on explaining the reason for the change as well as the change itself. A .gitignore file was used to ensure that only the necessary files were committed. 
+\subsection{Version Control}
+Git was essential for version control in the Sudoku solver's development. Branches were named using feature/ and refactor/ conventions for clarity and stability. A release branch ensured reproducibility for runs in figures \ref{fig:kaggle-million} and \ref{fig:hard-100}. Commit messages described both the reason and the change. A .gitignore file maintained commit relevance.
 
 \subsection{Unit Testing and Continuous Integration}
-The development of this programme was underpinned by a test-driven approach. Where possible, unit tests were written alongside the implementation of the corresponding functionality. As the project evolved, since the core logic remained largely unchanged, the initial unit tests remained relevant and effective, despite ongoing refactoring to improve code structure and readability. Unit tests were implemented using the pytest framework. Mocking is used where necessary in conjunction with testing on sample boards located in \texttt{test/\{module\_name\}\_test\_boards}. 
-The tests are run automatically on every commit through pre-commit hooks in found in the \texttt{.pre-commit-config.yaml}. A practice in line with CI/CD strategies to ensure code quality and functionality before integration. The pre-commit hooks also fix file endings, remove trailing whitespaces, ensure consistent line endings. It also ensures the python scripts are properly formatted with Black and checks for PEP8 compliance with Flake8.
+A test-driven approach guided the development. Initial unit tests remained relevant through ongoing refactoring, using the pytest framework and mocks for sample boards in \texttt{test/\{module\_name\}\_test\_boards}. Pre-commit hooks, defined in \texttt{.pre-commit-config.yaml}, run tests automatically, enforce code style with Black, and check PEP8 compliance with Flake8, aligning with CI/CD practices.
 
 \subsection{Packaging and Accessibility}
-For maximum accessbility, the programme was containersied via docker which provides a lightweight and portable solution for packaging, distributing, and running applications in isolated environments. It enables consistent and reproducible deployments. The environment was created using Conda and is reproducable through the associated environment.yml file. Instructions for running the containerised application are provided in the README.md file.
+For accessibility, the program was containerized using Docker, ensuring lightweight, portable, and reproducible deployments. A Conda environment, reproducible via the environment.yml file, was used. Instructions for running the Docker container are in the README.md.
 
 \section{Conclusion}
-The report details the Sudoku solver's development, highlighting problem decomposition, solution design and implementation, underpinned by software engineering principles like modularisation, defensive programming, single responsibility, and encapsulation. These practices not only deliver an effective solver but also set a foundation for future enhancements and adaptability.
+This report outlines the Sudoku solver's development, emphasizing problem decomposition, solution design, and implementation, supported by software engineering principles such as modularisation, defensive programming, single responsibility, and encapsulation. These practices ensure an effective solver and foundation for future enhancements.
 
 \bibliographystyle{plain}
 \bibliography{mybibfile}
