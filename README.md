@@ -1,4 +1,3 @@
-
 # Sudoku Solver CLI
 
 ## Introduction
@@ -135,7 +134,7 @@ docker run --rm -it \
   --output_format_type grid \
   --solver bt_easiest_first \
   --output_path hello_world/hard_100 \
-  --stats_path hello_world/hard_100/hard_100_summary.txt \
+  --stats_path hello_world/hard_100/hard_100_run_stats.txt \
   --timeout 30
 ```
 
