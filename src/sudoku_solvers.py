@@ -220,8 +220,8 @@ class BacktrackingSolverEasiestFirst(BacktrackingSolverBasic):
 
     Methods
     -------
-    _find_easiest_cell(board: SudokuBoard, row_idxs: List[int], col_idxs: List[int]) ->
-    Tuple[int, int, Set[int]]
+    _find_easiest_cell(board: SudokuBoard, row_idxs: List[int], col_idxs: List[int]) \
+    -> Tuple[int, int, Set[int]]
         Identify the cell on a Sudoku board with the fewest possible options, and return a tuple
         containing the cell's row and column indices and the set of valid options for that cell.
         This method is used internally by the backtracking algorithm to pick the next cell to fill.
