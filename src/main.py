@@ -7,8 +7,11 @@ from utils import (
     solve_sudoku,
     get_solver_kwargs,
     initialise_solver_and_format_handler,
+    load_boards,
 )
-from exceptions import FormatError
+import sys
+
+# TODO: Sort input for batch so files are processed in order.
 
 
 def validate_args(args: argparse.Namespace) -> argparse.Namespace:
@@ -133,49 +136,37 @@ def validate_args(args: argparse.Namespace) -> argparse.Namespace:
 
 
 def main(args):
-    args = validate_args(args)
-
-    solver_kwargs = get_solver_kwargs(args)
-
-    format_handler, solver = initialise_solver_and_format_handler(args.solver, solver_kwargs)
+    try:
+        args = validate_args(args)
+        solver_kwargs = get_solver_kwargs(args)
+        format_handler, solver = initialise_solver_and_format_handler(args.solver, solver_kwargs)
+    except Exception as e:
+        print(f"[ERROR] {e}")
+        sys.exit(1)
 
     # Initialise list tracking solve time and status.
     solve_stats = []
 
     # Solve sudoku(s).
     if args.batch:
-        # Fetch all files in the directory, excluding hidden files.
-        sudoku_files = [file for file in os.listdir(args.sudoku_input) if not file.startswith(".")]
+        # Fetch boards from directory.
+        sudoku_boards_fpaths_tuple = load_boards(args.sudoku_input, args.input_format_type)
 
         # Loop through all files in the directory.
-        for idx, file in enumerate(sudoku_files):
-            file_path = os.path.join(args.sudoku_input, file)
-            try:
-                solved_board, solve_time, status = solve_sudoku(
-                    file_path,
-                    solver,
-                    format_handler,
-                    args.input_format_type,
-                    args.input_type,
-                )
-            # If the file is not a valid sudoku board, skip it.
-            except FormatError as e:
-                print(f"[ERROR] {file_path} not valid sudoku - {e}")
-                continue
+        for idx, (file_path, board) in enumerate(sudoku_boards_fpaths_tuple):
+            solved_board, solve_time, status = solve_sudoku(board, solver)
 
-            # print every len(sudoku_files) / 100 boards.
-
-            print(f"\rSolved {idx+1}/{len(sudoku_files)} boards", end="")
+            print(f"\rSolved {idx+1}/{len(sudoku_boards_fpaths_tuple)} boards", end="")
 
             if args.output_path:
                 # Save solved board.
-                output_file = os.path.join(args.output_path, f"solved_{file}")
+                output_file = os.path.join(args.output_path, f"solved_{file_path}")
                 format_handler.save(
                     solved_board, args.output_format_type, output_file
                 ) if solved_board else None
 
             # Save run statistics.
-            solve_stats.append((file, solve_time, status))
+            solve_stats.append((file_path, solve_time, status))
 
         # Calculate summary statistics.
         total_boards = len(solve_stats)
@@ -241,13 +232,9 @@ def main(args):
                 json.dump(output_summary_dict, f, indent=4)
 
     else:
-        solved_board, solve_time, status = solve_sudoku(
-            args.sudoku_input,
-            solver,
-            format_handler,
-            args.input_format_type,
-            args.input_type,
-        )
+        sudoku_board_fpath_tuple = load_boards(args.sudoku_input, args.input_format_type)
+        board, path = sudoku_board_fpath_tuple[0]
+        solved_board, solve_time, status = solve_sudoku(board, solver)
 
         # If board was solved and output path is set, save the solved board.
         if args.output_path and solved_board:

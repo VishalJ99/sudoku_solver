@@ -45,7 +45,9 @@ def test_board_representation():
 
 def test_place_remove_number_and_getter():
     # Check that the board can be indexed like a numpy array.
-    # Check the error handling for invalid values.
+    # Check the board manipulation logic works as expected.
+    # Test set initalisation and attributes are getting updated
+    # too.
     INPUT = "test/sudoku_parser_test_boards/good_input.txt"
 
     format_handler = SudokuFormatHandler()
