@@ -148,7 +148,7 @@ class BacktrackingSolverBasic(Solver):
                     return True
 
                 # Puzzle was not solved, undo the move and try new number.
-                self.board.remove_number(i, j, num)
+                self.board.remove_number(i, j)
 
         # Incorrect move was made previously, backtrack.
         return False

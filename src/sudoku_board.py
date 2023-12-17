@@ -45,7 +45,7 @@ class SudokuBoard:
         Checks if a number can be legally placed in the specified row and column.
     place_number(row: int, col: int, num: int)
         Places a number on the Sudoku board at the specified row and column.
-    remove_number(row: int, col: int, num: int)
+    remove_number(row: int, col: int)
         Removes a number from the Sudoku board at the specified row and column.
     find_possible_cell_values(row: int, col: int) -> Set[int]
         Determines the possible values that can be placed in a specific cell of the Sudoku board.
@@ -322,7 +322,7 @@ class SudokuBoard:
         else:
             raise ValueError("Number violates sudoku rules at the specified position")
 
-    def remove_number(self, row: int, col: int, num: int):
+    def remove_number(self, row: int, col: int):
         """
         Removes a number from the Sudoku board at the specified row and column.
         Removes the number to the sets representing that row, column, and 3x3 subgrid.
@@ -334,15 +334,13 @@ class SudokuBoard:
             The row index from which the number is to be removed (0-based).
         col : int
             The column index from which the number is to be removed (0-based).
-        num : int
-            The number to be removed from the board.
 
         Raises
         ------
         ValueError
             If the specified position is invalid or the number is not in the current board state.
         """
-
+        num = self._board[row][col]
         self._board[row][col] = 0
         self.rows[row].remove(num)
         self.columns[col].remove(num)
