@@ -150,7 +150,9 @@ def main(args):
     # Solve sudoku(s).
     if args.batch:
         # Fetch boards from directory.
-        sudoku_boards_fpaths_tuple = load_boards(args.sudoku_input, args.input_format_type)
+        sudoku_boards_fpaths_tuple = load_boards(
+            args.sudoku_input, format_handler, args.input_format_type
+        )
 
         # Loop through all files in the directory.
         for idx, (file_path, board) in enumerate(sudoku_boards_fpaths_tuple):
@@ -160,7 +162,9 @@ def main(args):
 
             if args.output_path:
                 # Save solved board.
-                output_file = os.path.join(args.output_path, f"solved_{file_path}")
+                output_file = os.path.join(
+                    args.output_path, f"solved_{os.path.basename(file_path)}"
+                )
                 format_handler.save(
                     solved_board, args.output_format_type, output_file
                 ) if solved_board else None

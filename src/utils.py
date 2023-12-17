@@ -149,7 +149,7 @@ def load_boards(
     format_handler: SudokuFormatHandler,
     format: str = "grid",
     input_type: str = "filepath",
-) -> Tuple[str, ...]:
+) -> Tuple[Tuple[str, SudokuBoard]]:
     """
     Load a set of Sudoku boards from an input directory or file.
 
@@ -172,8 +172,12 @@ def load_boards(
 
     Raises
     ------
+    FileNotFound
+        If the input file or directory does not exist. Only raised if `input_type` is 'filepath'.
     FormatError
         If the input format is incorrect or not as expected.
+    ValueError
+        If the input type is not supported or other parsing errors occur.
 
     Raises
 
@@ -192,14 +196,15 @@ def load_boards(
     if input_type == "filepath" and not os.path.exists(board_path):
         raise FileNotFoundError(f"File or directory {board_path} does not exist.")
 
-    board_paths = [board_path]
     if os.path.isdir(board_path):
         # Get all non-hidden files in directory.
         board_paths = [
-            os.path.join(board_path, file)
-            for file in os.listdir(board_path)
-            if not file.startswith(".")
+            os.path.join(board_path, f) for f in os.listdir(board_path) if not f.startswith(".")
         ]
+
+    else:
+        # Convert single file path to list for consistent handling.
+        board_paths = [board_path]
 
     sudoku_boards = []
     exceptions = []
