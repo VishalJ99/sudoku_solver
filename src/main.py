@@ -246,10 +246,6 @@ def main(args):
         if args.output_path and solved_board:
             format_handler.save(solved_board, args.out_format_type, args.output_path)
 
-        # TODO: improve this logic. Feels hacky.
-        # In single mode explictly load board from file for printing to console.
-        board = format_handler.parse(args.sudoku_input, args.input_format_type, args.input_type)
-
         print("\nInput Board:")
         print(board)
         print("\nSolution:")
