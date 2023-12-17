@@ -179,7 +179,6 @@ def load_boards(
     ValueError
         If the input type is not supported or other parsing errors occur.
 
-    Raises
 
     Notes
     -----

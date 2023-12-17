@@ -33,6 +33,7 @@ report/*
 !report/main.tex
 !report/main.pdf
 !report/figs
+!report/mybib.bib
 
 # dont track solver output
 solver_out*
