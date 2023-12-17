@@ -32,7 +32,7 @@ sandbox.ipynb
 report/*
 !report/main.tex
 !report/main.pdf
-!report/fig/
+!report/figs
 
 # dont track solver output
 solver_out*
