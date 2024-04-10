@@ -17,7 +17,7 @@ This repository contains a command-line interface (CLI) tool for solving Sudoku 
 To install this Sudoku Solver, clone this repository and navigate to the cloned directory and build the docker image.
 
 ```
-git clone git@gitlab.developers.cam.ac.uk:phy/data-intensive-science-mphil/c1_assessment/vj279.git
+git clone git@github.com:VishalJ99/sudoku_solver.git
 cd sudoku_solver
 docker build -t sudoku_solver .
 ```
