@@ -18,8 +18,8 @@ To install this Sudoku Solver, clone this repository and navigate to the cloned 
 
 ```
 git clone git@gitlab.developers.cam.ac.uk:phy/data-intensive-science-mphil/c1_assessment/vj279.git
-cd vj279
-docker build -t c1_vj279 .
+cd sudoku_solver
+docker build -t sudoku_solver .
 ```
 
 ## Expected Input Format
@@ -75,7 +75,7 @@ No corrections are made for invalid flat formats. If the input is not a valid fl
 
 ## Usage
 ```
-docker run -v $(pwd):/C1_VJ279 c1_vj279 python src/main.py <sudoku_input.txt> [options]
+docker run -v $(pwd):/C1_VJ279 sudoku_solver python src/main.py <sudoku_input.txt> [options]
 ```
 
 ### Command Line Arguments
@@ -106,13 +106,13 @@ To run these examples please ensure your working directory is the root directory
 
 Example of basic usage for single file
 ```
-docker run c1_vj279 python src/main.py test/sudoku_solver_test_boards/easy_1.txt
+docker run sudoku_solver python src/main.py test/sudoku_solver_test_boards/easy_1.txt
 ```
 
 Example of basic usage for string input
 
 ```
-docker run c1_vj279 python src/main.py \
+docker run sudoku_solver python src/main.py \
   "004300209005009001070060043006002087190007400050083000600000105003508690042910300" \
   --input_type string \
   --input_format_type flat
@@ -121,14 +121,14 @@ docker run c1_vj279 python src/main.py \
 Example of basic usage for batch mode
 
 ```
-docker run -v $(pwd):/C1_VJ279 c1_vj279 python src/main.py benchmark_board_sets/easy_100 --batch --input_format_type flat
+docker run -v $(pwd):/C1_VJ279 sudoku_solver python src/main.py benchmark_board_sets/easy_100 --batch --input_format_type flat
 ```
 
 Example of advanced usage for single file (may take 2-3 minutes to run)
 ```
 docker run --rm -it \
   -v $(pwd):/C1_VJ279 \
-  c1_vj279 python src/main.py benchmark_board_sets/hard_100 \
+  sudoku_solver python src/main.py benchmark_board_sets/hard_100 \
   --batch \
   --input_format_type flat \
   --output_format_type grid \
@@ -141,7 +141,7 @@ docker run --rm -it \
 ## Building the autodocumentation
 Ensure your working directory is the root directory of the repository
 ```
-docker run -it -v $(pwd):/C1_VJ279 c1_vj279
+docker run -it -v $(pwd):/C1_VJ279 sudoku_solver
 # in docker container shell
 cd docs
 make html
